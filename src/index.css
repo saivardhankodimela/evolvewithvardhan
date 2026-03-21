@@ -2,30 +2,31 @@
 
 /* 
  * Tailwind CSS v4 Configuration 
- * Core Design Tokens mapping the Deep Slate / Pearl Light glass scheme.
+ * Core Design Tokens mapping the ultra-premium Apple Liquid / OLED Midnight scheme.
  */
 
 @theme {
-  --color-slate-900: #0f172a;
-  --color-slate-800: #1e293b;
-  --color-cobalt-500: #3b82f6;
-  --color-cobalt-600: #2563eb;
+  --color-slate-900: #0a0a0a; /* OLED Black */
+  --color-slate-800: #171717;
+  --color-slate-50:  #f5f5f7; /* Apple Silver */
+  --color-cobalt-500: #06b6d4; /* Liquid Cyan */
+  --color-cobalt-600: #0891b2;
   --color-emerald-500: #10b981;
-  --color-purple-500: #a855f7;
-  --color-pearl-50: #f8fafc;
+  --color-purple-500: #8b5cf6; /* Neon Violet */
+  --color-pearl-50: #ffffff;
 }
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
   :root {
-    --bg-primary: var(--color-pearl-50);
+    --bg-primary: var(--color-slate-50);
     --text-primary: var(--color-slate-900);
   }
   
   :root.dark {
     --bg-primary: var(--color-slate-900);
-    --text-primary: var(--color-pearl-50);
+    --text-primary: var(--color-slate-50);
   }
 
   body {
@@ -35,13 +36,13 @@
   }
 }
 
-/* Glassmorphism Utilities */
+/* Apple Liquid Glassmorphism Utilities */
 @layer utilities {
   .glass-dark {
-    @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl;
+    @apply bg-black/30 backdrop-blur-3xl backdrop-saturate-150 border border-white/10 shadow-[inset_0_1px_rgba(255,255,255,0.1),_0_8px_32px_rgba(0,0,0,0.5)];
   }
   .glass-light {
-    @apply bg-white/40 backdrop-blur-xl border border-white/40 shadow-xl;
+    @apply bg-white/50 backdrop-blur-3xl backdrop-saturate-150 border border-black/5 shadow-[inset_0_1px_rgba(255,255,255,0.8),_0_8px_32px_rgba(0,0,0,0.05)];
   }
   .animate-shimmer {
     animation: shimmer 2s infinite linear;
