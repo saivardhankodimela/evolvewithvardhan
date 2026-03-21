@@ -23,7 +23,8 @@ function App() {
   }, [isDarkMode]);
 
   return (
-    <div className="min-h-screen font-sans selection:bg-cobalt-500/30">
+    // The cinematic sunrise/sunset transition is handled by background color easing
+    <div className="min-h-screen font-sans selection:bg-cobalt-500/30 bg-slate-50 dark:bg-[#0a0a0a] transition-colors duration-[1500ms] ease-in-out text-slate-900 dark:text-slate-50">
       
       {/* Floating Ribbon Header */}
       <div className="fixed top-6 w-full flex justify-center z-50 px-4 pointer-events-none">
@@ -61,8 +62,8 @@ function App() {
       </div>
 
       {/* Main Content Area */}
-      <main className="pt-32 pb-16 px-6 max-w-5xl mx-auto flex flex-col gap-24">
-        <Hero />
+      <main className="pt-32 pb-16 px-6 max-w-5xl mx-auto flex flex-col gap-24 relative z-10">
+        <Hero isDarkMode={isDarkMode} />
         <GrowthTimeline />
         <AppsShowcase />
       </main>

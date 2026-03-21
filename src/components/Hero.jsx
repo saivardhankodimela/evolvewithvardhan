@@ -1,27 +1,88 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Sparkles, ArrowUpRight } from 'lucide-react';
 
-const Hero = () => {
+const AstralBody = ({ isDarkMode, scrollYProgress }) => {
+  const [moonPhase, setMoonPhase] = useState(0.5); // Default Full Moon
+
+  // Calculate real-world astronomical moon phase
+  useEffect(() => {
+    const cycle = 29.5305882;
+    // Known new moon: Jan 11, 2024
+    const knownNewMoon = new Date('2024-01-11T11:57:00Z').getTime();
+    const age = (Date.now() - knownNewMoon) / 86400000;
+    const phase = (age % cycle) / cycle;
+    setMoonPhase(phase);
+  }, []);
+
+  // Parallax the sun/moon "setting" as user scrolls down
+  const yTranslate = useTransform(scrollYProgress, [0, 1], [0, 400]);
+  const opacity = useTransform(scrollYProgress, [0.5, 1], [1, 0]);
+
+  // Determine shadow offset based on phase (simplified moon phase visualizer)
+  // phase: 0 (New), 0.25 (First Qtr), 0.5 (Full), 0.75 (Last Qtr)
+  // shadowOffset ranges from -40 (Full shadow left) to 40 (Full shadow right)
+  const shadowX = Math.sin(moonPhase * Math.PI * 2) * 50;
+
+  return (
+    <motion.div 
+      style={{ y: yTranslate, opacity }}
+      className="absolute top-10 right-20 md:right-40 z-0 pointer-events-none"
+    >
+      {isDarkMode ? (
+        // Dynamic Moon
+        <div className="relative w-24 h-24 md:w-32 md:h-32">
+          {/* Moon Base (Glow) */}
+          <div className="absolute inset-0 rounded-full bg-slate-200 shadow-[0_0_40px_rgba(255,255,255,0.4)] overflow-hidden">
+             {/* Moon Craters (Subtle details) */}
+             <div className="absolute top-4 left-6 w-4 h-4 rounded-full bg-slate-300/40 blur-[1px]" />
+             <div className="absolute top-10 right-8 w-6 h-6 rounded-full bg-slate-300/50 blur-[2px]" />
+             <div className="absolute bottom-6 left-10 w-8 h-8 rounded-full bg-slate-300/30 blur-[2px]" />
+             
+             {/* Dynamic Shadow Cast (creates the phase) */}
+             <div 
+                className="absolute w-[120%] h-[120%] rounded-full bg-[#0a0a0a] transition-all duration-1000 ease-in-out blur-[4px]"
+                style={{ 
+                   top: '-10%',
+                   left: `${shadowX}%`, 
+                   transform: `scale(${moonPhase > 0.4 && moonPhase < 0.6 ? 0 : 1})` // Hide shadow if full moon
+                }}
+             />
+          </div>
+        </div>
+      ) : (
+        // The Sun
+        <div className="relative w-24 h-24 md:w-32 md:h-32">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-300 to-orange-400 shadow-[0_0_60px_rgba(251,191,36,0.8)] animate-pulse" />
+        </div>
+      )}
+    </motion.div>
+  );
+};
+
+const Hero = ({ isDarkMode }) => {
   const containerRef = useRef(null);
   
-  // Track scroll position to power the "Growing Neural Tree"
+  // Track scroll position to power the "Growing Literal Tree"
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end center"] // Tree finishes growing as they scroll past the hero
+    offset: ["start start", "end center"] 
   });
 
   // Spring physics for smooth drawing
-  const pathLength = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
-  const treeOpacity = useTransform(scrollYProgress, [0, 0.2], [0.3, 1]);
+  const pathLength = useSpring(scrollYProgress, { stiffness: 80, damping: 20, restDelta: 0.001 });
+  const treeOpacity = useTransform(scrollYProgress, [0, 0.1], [0.5, 1]);
+
+  // Leaf scaling (Pop in at the very end of the scroll)
+  const leafScale = useTransform(scrollYProgress, [0.6, 1], [0, 1]);
 
   return (
     <section id="home" ref={containerRef} className="relative min-h-screen pt-32 pb-10 flex items-center overflow-hidden">
       
-      {/* Background Ambience Controls */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute top-1/4 right-1/4 w-[500px] h-[500px] bg-purple-500/20 mix-blend-screen filter blur-[100px] rounded-full opacity-60 animate-pulse" />
-        <div className="absolute bottom-1/4 left-1/4 w-[400px] h-[400px] bg-cobalt-500/10 mix-blend-screen filter blur-[120px] rounded-full opacity-50" />
+      {/* Background Ambience Controls (Sunset/Sunrise tints) */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 transition-colors duration-[1500ms]">
+        <div className={`absolute top-1/4 right-1/4 w-[500px] h-[500px] mix-blend-screen filter blur-[100px] rounded-full opacity-40 animate-pulse transition-colors duration-[1500ms] ${isDarkMode ? 'bg-purple-900/50' : 'bg-orange-300/40'}`} />
+        <div className={`absolute bottom-1/4 left-1/4 w-[400px] h-[400px] mix-blend-screen filter blur-[120px] rounded-full opacity-40 transition-colors duration-[1500ms] ${isDarkMode ? 'bg-cobalt-900/40' : 'bg-yellow-200/50'}`} />
       </div>
 
       <div className="w-full h-full max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20 relative z-10 px-6">
@@ -31,117 +92,110 @@ const Hero = () => {
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="w-full lg:w-1/2 flex flex-col items-start gap-8"
+          className="w-full lg:w-1/2 flex flex-col items-start gap-8 z-20"
         >
           {/* Greeting Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 dark:bg-black/20 border border-slate-200 dark:border-white/10 backdrop-blur-md shadow-sm text-sm font-semibold text-slate-700 dark:text-slate-300">
-            <Sparkles size={14} className="text-purple-500" />
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/40 dark:bg-white/10 border border-slate-300 dark:border-white/10 backdrop-blur-md shadow-sm text-sm font-semibold text-slate-700 dark:text-slate-300 transition-colors duration-[1500ms]">
+            <Sparkles size={14} className="text-cobalt-500 dark:text-purple-400" />
             <span>AI Generalist & Orchestration Builder</span>
           </div>
 
           {/* Headline Suite */}
           <div className="space-y-6">
-            <h1 className="text-6xl sm:text-7xl lg:text-[5rem] font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.05]">
+            <h1 className="text-6xl sm:text-7xl lg:text-[5rem] font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.05] transition-colors duration-[1500ms]">
               Sai Vardhan <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-cobalt-500">
+              <span className={`text-transparent bg-clip-text bg-gradient-to-r transition-all duration-[1500ms] ${isDarkMode ? 'from-purple-400 to-cobalt-400' : 'from-orange-500 to-emerald-600'}`}>
                 Kodimela
               </span>
             </h1>
             
-            <p className="text-xl text-slate-600 dark:text-slate-400 leading-relaxed max-w-lg font-medium">
+            <p className="text-xl text-slate-700 dark:text-slate-400 leading-relaxed max-w-lg font-medium transition-colors duration-[1500ms]">
               Independent consultant, AI enthusiast, and orchestrations builder. Documenting my journey running agents and engineering a scalable future from India.
             </p>
           </div>
 
           {/* Call to Action - Connect */}
-          <a href="#connect" className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold shadow-xl hover:shadow-purple-500/20 hover:scale-[1.02] active:scale-95 transition-all overflow-hidden mt-4">
+          <a href="#connect" className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-full bg-slate-900 dark:bg-slate-50 text-white dark:text-slate-900 font-bold shadow-xl hover:shadow-cobalt-500/20 hover:scale-[1.02] active:scale-95 transition-all overflow-hidden mt-4">
             <span className="relative z-10 text-lg">Connect</span>
             <ArrowUpRight size={22} className="relative z-10 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 dark:via-black/10 to-transparent -translate-x-full group-hover:animate-shimmer" />
           </a>
         </motion.div>
 
-        {/* Right Column: Scroll-Linked Growing Neural Tree */}
-        <div className="w-full lg:w-1/2 relative h-[500px] md:h-[600px] flex items-center justify-center pointer-events-none">
+        {/* Right Column: Astral Bodies & Scroll-Linked Literal Tree */}
+        <div className="w-full lg:w-1/2 relative h-[500px] md:h-[600px] flex items-end justify-center pointer-events-none">
+          
+          {/* The Sunset / Moonset */}
+          <AstralBody isDarkMode={isDarkMode} scrollYProgress={scrollYProgress} />
+
+          {/* The Literal Growing SVG Tree (Grows from bottom up to intercept the sky) */}
           <motion.svg 
             viewBox="0 0 500 600" 
-            className="w-full h-full overflow-visible drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]"
+            className="w-full h-full overflow-visible z-10"
             style={{ opacity: treeOpacity }}
           >
             <defs>
-              <linearGradient id="treeGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#8b5cf6" /> {/* Purple */}
-                <stop offset="50%" stopColor="#06b6d4" /> {/* Cyan */}
-                <stop offset="100%" stopColor="#10b981" /> {/* Emerald */}
+              <linearGradient id="trunkGrad" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stopColor={isDarkMode ? "#1e293b" : "#451a03"} /> {/* Bark Base */}
+                <stop offset="100%" stopColor={isDarkMode ? "#334155" : "#78350f"} /> {/* Bark Top */}
               </linearGradient>
-              <linearGradient id="branch1Grad" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#06b6d4" />
-                <stop offset="100%" stopColor="#3b82f6" />
-              </linearGradient>
-              <filter id="glow">
-                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-                <feMerge>
-                  <feMergeNode in="coloredBlur"/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
             </defs>
 
-            {/* Central Root / Trunk (Growing Downwards) */}
+            {/* TRUNK (Grows from very bottom 600 up to 300) */}
             <motion.path 
-              d="M 250,50 C 250,150 250,250 250,550" 
-              stroke="url(#treeGrad)" strokeWidth="6" fill="none"
-              style={{ pathLength }} strokeLinecap="round" filter="url(#glow)"
+              d="M 250,600 Q 240,450 250,300" 
+              stroke="url(#trunkGrad)" strokeWidth="24" fill="none"
+              style={{ pathLength }} strokeLinecap="round" 
             />
 
-            {/* Left Main Branch */}
-            <motion.path 
-              d="M 250,200 C 150,250 100,200 50,150" 
-              stroke="#8b5cf6" strokeWidth="4" fill="none"
-              style={{ pathLength }} strokeLinecap="round" filter="url(#glow)"
-            />
-            {/* Left Sub-Branch 1 */}
-            <motion.path 
-              d="M 150,225 C 100,300 50,350 20,400" 
-              stroke="#06b6d4" strokeWidth="2" fill="none"
-              style={{ pathLength }} strokeLinecap="round"
-            />
+            {/* MAIN BRANCHES */}
+            {/* Left Lower */}
+            <motion.path d="M 248,450 Q 180,380 120,320" stroke="url(#trunkGrad)" strokeWidth="14" fill="none" style={{ pathLength }} strokeLinecap="round" />
+            {/* Right Lower */}
+            <motion.path d="M 255,420 Q 340,360 400,280" stroke="url(#trunkGrad)" strokeWidth="12" fill="none" style={{ pathLength }} strokeLinecap="round" />
+            {/* Left Upper */}
+            <motion.path d="M 245,350 Q 180,250 100,200" stroke="url(#trunkGrad)" strokeWidth="10" fill="none" style={{ pathLength }} strokeLinecap="round" />
+            {/* Right Upper */}
+            <motion.path d="M 252,320 Q 320,220 380,150" stroke="url(#trunkGrad)" strokeWidth="9" fill="none" style={{ pathLength }} strokeLinecap="round" />
+            {/* Center Top Split */}
+            <motion.path d="M 250,300 Q 220,150 200,80" stroke="url(#trunkGrad)" strokeWidth="8" fill="none" style={{ pathLength }} strokeLinecap="round" />
+            <motion.path d="M 250,300 Q 280,180 300,100" stroke="url(#trunkGrad)" strokeWidth="7" fill="none" style={{ pathLength }} strokeLinecap="round" />
 
-            {/* Right Main Branch */}
-            <motion.path 
-              d="M 250,300 C 350,350 400,250 450,200" 
-              stroke="url(#branch1Grad)" strokeWidth="5" fill="none"
-              style={{ pathLength }} strokeLinecap="round" filter="url(#glow)"
-            />
-            {/* Right Sub-Branch 1 */}
-            <motion.path 
-              d="M 350,325 C 400,400 450,450 480,500" 
-              stroke="#10b981" strokeWidth="3" fill="none"
-              style={{ pathLength }} strokeLinecap="round" filter="url(#glow)"
-            />
-            {/* Right Sub-Branch 2 */}
-            <motion.path 
-              d="M 400,275 C 450,300 480,280 500,250" 
-              stroke="#06b6d4" strokeWidth="2" fill="none"
-              style={{ pathLength }} strokeLinecap="round"
-            />
+            {/* SUB-BRANCHES */}
+            <motion.path d="M 150,350 Q 100,380 60,350" stroke="url(#trunkGrad)" strokeWidth="4" fill="none" style={{ pathLength }} strokeLinecap="round" />
+            <motion.path d="M 330,370 Q 380,410 440,380" stroke="url(#trunkGrad)" strokeWidth="4" fill="none" style={{ pathLength }} strokeLinecap="round" />
+            <motion.path d="M 150,230 Q 80,140 40,160" stroke="url(#trunkGrad)" strokeWidth="3" fill="none" style={{ pathLength }} strokeLinecap="round" />
+            <motion.path d="M 340,190 Q 400,100 450,120" stroke="url(#trunkGrad)" strokeWidth="3" fill="none" style={{ pathLength }} strokeLinecap="round" />
+            <motion.path d="M 215,130 Q 150,60 120,80" stroke="url(#trunkGrad)" strokeWidth="2" fill="none" style={{ pathLength }} strokeLinecap="round" />
+            <motion.path d="M 285,140 Q 350,70 380,90" stroke="url(#trunkGrad)" strokeWidth="2" fill="none" style={{ pathLength }} strokeLinecap="round" />
 
-            {/* Bottom Left Branch */}
-            <motion.path 
-              d="M 250,450 C 180,500 120,480 80,450" 
-              stroke="#8b5cf6" strokeWidth="3" fill="none"
-              style={{ pathLength }} strokeLinecap="round" filter="url(#glow)"
-            />
-
-            {/* Nodes / Leaves (appear as branches grow) */}
-            <motion.circle cx="250" cy="50" r="8" fill="#8b5cf6" filter="url(#glow)" />
-            <motion.circle cx="50" cy="150" r="6" fill="#8b5cf6" style={{ scale: pathLength }} filter="url(#glow)" />
-            <motion.circle cx="450" cy="200" r="8" fill="#3b82f6" style={{ scale: pathLength }} filter="url(#glow)" />
-            <motion.circle cx="20" cy="400" r="4" fill="#06b6d4" style={{ scale: pathLength }} />
-            <motion.circle cx="480" cy="500" r="7" fill="#10b981" style={{ scale: pathLength }} filter="url(#glow)" />
-            <motion.circle cx="80" cy="450" r="5" fill="#8b5cf6" style={{ scale: pathLength }} filter="url(#glow)" />
-            <motion.circle cx="250" cy="550" r="10" fill="#10b981" style={{ scale: pathLength }} filter="url(#glow)" />
-            <motion.circle cx="500" cy="250" r="4" fill="#06b6d4" style={{ scale: pathLength }} />
+            {/* LEAVES (Appear magically at the end of the scroll) */}
+            <g fill={isDarkMode ? "#10b981" : "#059669"} opacity={isDarkMode ? 0.8 : 0.9}>
+              {/* Left Side Leaves */}
+              <motion.circle cx="120" cy="320" r="15" style={{ scale: leafScale }} />
+              <motion.circle cx="100" cy="200" r="20" style={{ scale: leafScale }} />
+              <motion.circle cx="60" cy="350" r="10" style={{ scale: leafScale }} />
+              <motion.circle cx="40" cy="160" r="14" style={{ scale: leafScale }} />
+              <motion.circle cx="120" cy="80" r="18" style={{ scale: leafScale }} />
+              
+              {/* Right Side Leaves */}
+              <motion.circle cx="400" cy="280" r="16" style={{ scale: leafScale }} />
+              <motion.circle cx="380" cy="150" r="22" style={{ scale: leafScale }} />
+              <motion.circle cx="440" cy="380" r="12" style={{ scale: leafScale }} />
+              <motion.circle cx="450" cy="120" r="15" style={{ scale: leafScale }} />
+              <motion.circle cx="380" cy="90" r="17" style={{ scale: leafScale }} />
+              
+              {/* Top/Center Leaves */}
+              <motion.circle cx="200" cy="80" r="25" style={{ scale: leafScale }} />
+              <motion.circle cx="300" cy="100" r="24" style={{ scale: leafScale }} />
+              
+              {/* Scattered internal leaves for volume */}
+              <motion.circle cx="180" cy="260" r="18" style={{ scale: leafScale }} />
+              <motion.circle cx="320" cy="240" r="16" style={{ scale: leafScale }} />
+              <motion.circle cx="250" cy="180" r="22" style={{ scale: leafScale }} />
+              <motion.circle cx="210" cy="170" r="14" style={{ scale: leafScale }} />
+              <motion.circle cx="280" cy="150" r="15" style={{ scale: leafScale }} />
+            </g>
 
           </motion.svg>
         </div>
