@@ -25,25 +25,28 @@ function App() {
   return (
     <div className="min-h-screen font-sans selection:bg-cobalt-500/30">
       
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center backdrop-blur-md bg-white/30 dark:bg-slate-900/40 border-b border-black/5 dark:border-white/10">
-        <div className="flex items-center gap-2">
-          {/* Logo Placeholder (Kanuga Tree Vector goes here) */}
-          <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
-            <div className="w-2 h-4 rounded-full bg-emerald-400"></div>
+      {/* Floating Ribbon Header */}
+      <div className="fixed top-6 w-full flex justify-center z-50 px-4 pointer-events-none">
+        <nav className="pointer-events-auto flex items-center justify-between gap-8 px-6 py-3 rounded-full glass-light dark:glass-dark border border-white/40 dark:border-white/10 shadow-lg shadow-black/5 dark:shadow-white/5">
+          
+          <div className="flex items-center gap-3">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-600 flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.4)]">
+              <div className="w-1.5 h-3 rounded-full bg-white opacity-80"></div>
+            </div>
+            <span className="font-bold tracking-tight text-slate-800 dark:text-slate-100 font-sans">
+              Grow with Vardhan
+            </span>
           </div>
-          <span className="font-semibold tracking-tight hidden sm:block">SVK</span>
-        </div>
 
-        {/* Theme Toggle Button */}
-        <button
-          onClick={toggleTheme}
-          className="p-2 rounded-full bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-          aria-label="Toggle Dark Mode"
-        >
-          {isDarkMode ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} className="text-slate-600" />}
-        </button>
-      </nav>
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 rounded-full hover:bg-slate-200/50 dark:hover:bg-slate-700/50 transition-colors"
+            aria-label="Toggle Dark Mode"
+          >
+            {isDarkMode ? <Sun size={18} className="text-yellow-400 hover:text-yellow-300 transition-colors" /> : <Moon size={18} className="text-slate-600 hover:text-slate-900 transition-colors" />}
+          </button>
+        </nav>
+      </div>
 
       {/* Main Content Area */}
       <main className="pt-32 pb-16 px-6 max-w-5xl mx-auto flex flex-col gap-24">
