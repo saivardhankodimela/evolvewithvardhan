@@ -1,24 +1,22 @@
 import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Sparkles, ArrowUpRight } from 'lucide-react';
 
 const Hero = () => {
   const containerRef = useRef(null);
   
-  // Tie the 3D Rotation to the user's physical scroll
+  // Track scroll position to power the "Growing Neural Tree"
   const { scrollYProgress } = useScroll({
     target: containerRef,
-    offset: ["start start", "end start"]
+    offset: ["start start", "end center"] // Tree finishes growing as they scroll past the hero
   });
 
-  // Calculate 3D transforms based on scroll
-  const rotateX = useTransform(scrollYProgress, [0, 1], [20, 180]);
-  const rotateY = useTransform(scrollYProgress, [0, 1], [-20, 360]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 0.5]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  // Spring physics for smooth drawing
+  const pathLength = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+  const treeOpacity = useTransform(scrollYProgress, [0, 0.2], [0.3, 1]);
 
   return (
-    <section id="home" ref={containerRef} className="relative min-h-screen pt-32 pb-10 flex items-center overflow-hidden perspective-[1000px]">
+    <section id="home" ref={containerRef} className="relative min-h-screen pt-32 pb-10 flex items-center overflow-hidden">
       
       {/* Background Ambience Controls */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
@@ -63,40 +61,89 @@ const Hero = () => {
           </a>
         </motion.div>
 
-        {/* Right Column: Scroll-Linked 3D Assembly */}
-        <div className="w-full lg:w-1/2 relative h-[500px] md:h-[600px] flex items-center justify-center pointer-events-none transform-style-3d">
-          
-          <motion.div 
-            style={{ rotateX, rotateY, scale, opacity }}
-            className="w-64 h-64 md:w-80 md:h-80 relative transform-style-3d"
+        {/* Right Column: Scroll-Linked Growing Neural Tree */}
+        <div className="w-full lg:w-1/2 relative h-[500px] md:h-[600px] flex items-center justify-center pointer-events-none">
+          <motion.svg 
+            viewBox="0 0 500 600" 
+            className="w-full h-full overflow-visible drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]"
+            style={{ opacity: treeOpacity }}
           >
-            {/* 3D Core - Transforming on scroll */}
-            <div className="absolute inset-0 border-[3px] border-cobalt-500/30 rounded-full animate-[spin_10s_linear_infinite]" />
-            <div className="absolute inset-4 border-[2px] border-purple-500/40 rounded-full animate-[spin_15s_linear_infinite_reverse] rotate-x-45" />
-            <div className="absolute inset-8 border-[1px] border-emerald-500/50 rounded-full animate-[spin_20s_linear_infinite] rotate-y-45" />
-            
-            {/* The Floating Glass Plate Core */}
-            <motion.div 
-              animate={{ y: [0, -20, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute inset-0 flex items-center justify-center transform-style-3d"
-            >
-              <div className="w-48 h-48 md:w-64 md:h-64 glass-light dark:glass-dark rounded-[40px] border border-white/20 shadow-[0_0_50px_rgba(139,92,246,0.3)] flex items-center justify-center -translate-z-12 backdrop-blur-3xl">
-                <div className="w-24 h-24 bg-gradient-to-tr from-cobalt-500 to-purple-600 rounded-full blur-xl opacity-80 animate-pulse" />
-              </div>
-            </motion.div>
+            <defs>
+              <linearGradient id="treeGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#8b5cf6" /> {/* Purple */}
+                <stop offset="50%" stopColor="#06b6d4" /> {/* Cyan */}
+                <stop offset="100%" stopColor="#10b981" /> {/* Emerald */}
+              </linearGradient>
+              <linearGradient id="branch1Grad" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="#06b6d4" />
+                <stop offset="100%" stopColor="#3b82f6" />
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
 
-            {/* Orbiting UI Elements mapped to the sphere */}
-            <motion.div 
-              className="absolute top-0 right-0 w-24 h-24 glass-light dark:glass-dark rounded-2xl flex items-center justify-center translate-z-24 translate-x-1/2 -translate-y-1/2 shadow-2xl border border-white/30"
-              animate={{ rotateZ: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            >
-               <div className="w-6 h-6 bg-emerald-400 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.8)]" />
-            </motion.div>
-            
-          </motion.div>
+            {/* Central Root / Trunk (Growing Downwards) */}
+            <motion.path 
+              d="M 250,50 C 250,150 250,250 250,550" 
+              stroke="url(#treeGrad)" strokeWidth="6" fill="none"
+              style={{ pathLength }} strokeLinecap="round" filter="url(#glow)"
+            />
 
+            {/* Left Main Branch */}
+            <motion.path 
+              d="M 250,200 C 150,250 100,200 50,150" 
+              stroke="#8b5cf6" strokeWidth="4" fill="none"
+              style={{ pathLength }} strokeLinecap="round" filter="url(#glow)"
+            />
+            {/* Left Sub-Branch 1 */}
+            <motion.path 
+              d="M 150,225 C 100,300 50,350 20,400" 
+              stroke="#06b6d4" strokeWidth="2" fill="none"
+              style={{ pathLength }} strokeLinecap="round"
+            />
+
+            {/* Right Main Branch */}
+            <motion.path 
+              d="M 250,300 C 350,350 400,250 450,200" 
+              stroke="url(#branch1Grad)" strokeWidth="5" fill="none"
+              style={{ pathLength }} strokeLinecap="round" filter="url(#glow)"
+            />
+            {/* Right Sub-Branch 1 */}
+            <motion.path 
+              d="M 350,325 C 400,400 450,450 480,500" 
+              stroke="#10b981" strokeWidth="3" fill="none"
+              style={{ pathLength }} strokeLinecap="round" filter="url(#glow)"
+            />
+            {/* Right Sub-Branch 2 */}
+            <motion.path 
+              d="M 400,275 C 450,300 480,280 500,250" 
+              stroke="#06b6d4" strokeWidth="2" fill="none"
+              style={{ pathLength }} strokeLinecap="round"
+            />
+
+            {/* Bottom Left Branch */}
+            <motion.path 
+              d="M 250,450 C 180,500 120,480 80,450" 
+              stroke="#8b5cf6" strokeWidth="3" fill="none"
+              style={{ pathLength }} strokeLinecap="round" filter="url(#glow)"
+            />
+
+            {/* Nodes / Leaves (appear as branches grow) */}
+            <motion.circle cx="250" cy="50" r="8" fill="#8b5cf6" filter="url(#glow)" />
+            <motion.circle cx="50" cy="150" r="6" fill="#8b5cf6" style={{ scale: pathLength }} filter="url(#glow)" />
+            <motion.circle cx="450" cy="200" r="8" fill="#3b82f6" style={{ scale: pathLength }} filter="url(#glow)" />
+            <motion.circle cx="20" cy="400" r="4" fill="#06b6d4" style={{ scale: pathLength }} />
+            <motion.circle cx="480" cy="500" r="7" fill="#10b981" style={{ scale: pathLength }} filter="url(#glow)" />
+            <motion.circle cx="80" cy="450" r="5" fill="#8b5cf6" style={{ scale: pathLength }} filter="url(#glow)" />
+            <motion.circle cx="250" cy="550" r="10" fill="#10b981" style={{ scale: pathLength }} filter="url(#glow)" />
+            <motion.circle cx="500" cy="250" r="4" fill="#06b6d4" style={{ scale: pathLength }} />
+
+          </motion.svg>
         </div>
 
       </div>
