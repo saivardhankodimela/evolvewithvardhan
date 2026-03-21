@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+/* 
+ * Tailwind CSS v4 Configuration 
+ * Core Design Tokens mapping the Deep Slate / Pearl Light glass scheme.
+ */
+
+@theme {
+  --color-slate-900: #0f172a;
+  --color-slate-800: #1e293b;
+  --color-cobalt-500: #3b82f6;
+  --color-cobalt-600: #2563eb;
+  --color-emerald-500: #10b981;
+  --color-purple-500: #a855f7;
+  --color-pearl-50: #f8fafc;
+}
+
+@layer base {
+  :root {
+    --bg-primary: var(--color-pearl-50);
+    --text-primary: var(--color-slate-900);
+  }
+  
+  :root.dark {
+    --bg-primary: var(--color-slate-900);
+    --text-primary: var(--color-pearl-50);
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    @apply antialiased transition-colors duration-500;
+  }
+}
+
+/* Glassmorphism Utilities */
+@layer utilities {
+  .glass-dark {
+    @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+  .glass-light {
+    @apply bg-white/40 backdrop-blur-xl border border-white/40 shadow-xl;
+  }
+  .animate-shimmer {
+    animation: shimmer 2s infinite linear;
+  }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
