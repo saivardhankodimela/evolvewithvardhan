@@ -68,9 +68,10 @@ const Cloud = ({ top, left, scale, duration, delay, opacity, isDarkMode }) => (
 
 const Stars = ({ isDarkMode }) => {
   // Generate a massive galaxy of tiny stars everywhere
-  const starsArray = Array.from({ length: 200 });
+  // using pure CSS animations instead of Framer Motion to completely eliminate transition lag
+  const starsArray = Array.from({ length: 150 });
   return (
-    <div className={`absolute inset-0 pointer-events-none transition-opacity duration-1000 ${isDarkMode ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`absolute inset-0 pointer-events-none transition-opacity duration-[1500ms] will-change-opacity ${isDarkMode ? 'opacity-100' : 'opacity-0'}`}>
       {starsArray.map((_, i) => {
         const size = Math.random() * 2 + 1;
         const top = Math.random() * 100;
@@ -78,13 +79,16 @@ const Stars = ({ isDarkMode }) => {
         const delay = Math.random() * 5;
         const duration = Math.random() * 5 + 3;
         return (
-          <motion.div
+          <div
             key={i}
-            className="absolute rounded-full bg-white will-change-transform shadow-[0_0_8px_rgba(255,255,255,1)]"
-            style={{ top: `${top}%`, left: `${left}%`, width: size, height: size }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, Math.random() * 0.5 + 0.5, 0] }}
-            transition={{ repeat: Infinity, duration, delay, ease: "easeInOut" }}
+            className="absolute rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,1)]"
+            style={{ 
+              top: `${top}%`, 
+              left: `${left}%`, 
+              width: size, 
+              height: size,
+              animation: `twinkle ${duration}s infinite ${delay}s ease-in-out`
+            }}
           />
         );
       })}
@@ -105,12 +109,12 @@ const PersistentVFX = ({ isDarkMode }) => {
 
   return (
     <>
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1] bg-[#020617]">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1] bg-[#020617] will-change-[background-color]">
         
         {/* Dynamic Daylight Atmosphere */}
-        <div className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out ${isDarkMode ? 'opacity-0' : 'opacity-100'}`}>
+        <div className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out will-change-opacity ${isDarkMode ? 'opacity-0' : 'opacity-100'}`}>
            <div className="absolute inset-0 bg-gradient-to-b from-[#38bdf8] via-[#bae6fd] to-[#f0f9ff]" />
-           <div className="absolute top-[-20%] right-[-10%] w-[70vw] h-[70vw] bg-yellow-200/50 rounded-full blur-[140px] mix-blend-screen animate-pulse" />
+           <div className="absolute top-[-20%] right-[-10%] w-[70vw] h-[70vw] bg-yellow-200/50 rounded-full blur-[140px] mix-blend-screen animate-pulse will-change-transform" />
            <div className="absolute bottom-[-10%] left-[-20%] w-[80vw] h-[80vw] bg-cyan-300/40 rounded-full blur-[150px] mix-blend-multiply" />
            
            {/* Clouds Anchored strictly to the Left Side */}
@@ -121,7 +125,7 @@ const PersistentVFX = ({ isDarkMode }) => {
         </div>
 
         {/* Dynamic Nighttime Galaxy */}
-        <div className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out ${isDarkMode ? 'opacity-100' : 'opacity-0'}`}>
+        <div className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out will-change-opacity ${isDarkMode ? 'opacity-100' : 'opacity-0'}`}>
            <div className="absolute inset-0 bg-gradient-to-b from-[#020617] via-[#0f172a] to-[#020617]" />
            <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-indigo-900/40 rounded-full blur-[130px] mix-blend-screen" />
            <div className="absolute bottom-[20%] right-[-20%] w-[70vw] h-[70vw] bg-fuchsia-900/30 rounded-full blur-[150px] mix-blend-screen" />

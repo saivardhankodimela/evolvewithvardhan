@@ -32,7 +32,7 @@ function App() {
               <div className="w-1.5 h-3 rounded-full bg-white dark:bg-black opacity-80"></div>
             </div>
             <span className="font-bold tracking-tight text-zinc-900 dark:text-white font-sans">
-              Grow with Vardhan
+              Evolve with Vardhan
             </span>
           </div>
           <div className="flex-1 flex justify-center md:px-8">
