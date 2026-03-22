@@ -1,5 +1,5 @@
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 const AstralBody = ({ isDarkMode }) => {
   const [moonPhase, setMoonPhase] = useState(0.5);
@@ -68,50 +68,299 @@ const Cloud = ({ top, left, scale, duration, delay, opacity, isDarkMode }) => (
 
 const Stars = ({ isDarkMode }) => {
   // Generate a massive galaxy of tiny stars everywhere
-  // using pure CSS animations instead of Framer Motion to completely eliminate transition lag
-  const starsArray = Array.from({ length: 150 });
+  // using pure CSS animations and useMemo to prevent positional shifting glitch during React re-renders
+  const starsArray = useMemo(() => {
+    return Array.from({ length: 150 }).map(() => ({
+      size: Math.random() * 2 + 1,
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 5,
+      duration: Math.random() * 5 + 3
+    }));
+  }, []);
+
   return (
     <div className={`absolute inset-0 pointer-events-none transition-opacity duration-[1500ms] will-change-opacity ${isDarkMode ? 'opacity-100' : 'opacity-0'}`}>
-      {starsArray.map((_, i) => {
-        const size = Math.random() * 2 + 1;
-        const top = Math.random() * 100;
-        const left = Math.random() * 100;
-        const delay = Math.random() * 5;
-        const duration = Math.random() * 5 + 3;
-        return (
-          <div
-            key={i}
-            className="absolute rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,1)]"
+      {starsArray.map((star, i) => (
+        <div
+          key={i}
+          className="absolute rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,1)]"
+          style={{ 
+            top: `${star.top}%`, 
+            left: `${star.left}%`, 
+            width: star.size, 
+            height: star.size,
+            animation: `twinkle ${star.duration}s infinite ${star.delay}s ease-in-out`
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+// Pseudo-random number generator for stunning, deterministic biological rendering
+const PRNG = (seed) => {
+    let value = seed;
+    return () => {
+        value = (value * 16807) % 2147483647;
+        return (value - 1) / 2147483646; // returns [0, 1)
+    };
+};
+
+const MangoTree = ({ isDarkMode }) => {
+  const { scrollYProgress } = useScroll();
+
+  const woodColor = isDarkMode ? "#3d2b1f" : "#451a03"; 
+  const plantGreen = isDarkMode ? "#166534" : "#15803d";
+  const leafColor = isDarkMode ? "#064e3b" : "#059669"; 
+
+  // Procedural biological tree generation
+  const { branches, leaves, mangoes } = useMemo(() => {
+    const rand = PRNG(123456); // Golden seed for an incredibly realistic botanical fractal
+    const b = [];
+    const l = [];
+    const m = [];
+    
+    // Recursive Botanical Structure
+    const buildBranch = (x, y, length, angle, depth, startScroll) => {
+        if (depth === 0 || startScroll > 0.95) return;
+
+        const endX = x + length * Math.sin(angle);
+        const endY = y - length * Math.cos(angle);
+        const endScroll = startScroll + 0.1; // 10% scroll per structural generation
+        
+        b.push({
+            id: `branch_${depth}_${x}_${y}`,
+            x1: x, y1: y, x2: endX, y2: endY,
+            width: depth * 2.8 + 2, 
+            startScroll, endScroll
+        });
+
+        // ==========================================
+        // LEAF LOGISTICS (Strict Botanical Adherence)
+        // ==========================================
+        // 1. SAPLING / PLANT PHASE LEAVES (Depths 8, 7, 6)
+        if (depth >= 6) {
+            for(let i=0; i<2; i++) {
+                const isLeft = i % 2 === 0;
+                l.push({
+                    id: `sapling_leaf_${depth}_${i}_${endY}`,
+                    x: endX, y: endY, // Clamped perfectly to the green stem
+                    scale: 0.7,
+                    angle: isLeft ? -65 : 65, 
+                    spawnScroll: endScroll,
+                    fadeScroll: endScroll + 0.35 // Plummets off the tree as the trunk hardens
+                });
+            }
+        }
+        
+        // 2. MATURE CANOPY (Depths 1, 2)
+        // Eliminates 'floating leaves' by clamping XY origins strictly to the twig endpoints
+        if (depth <= 2) {
+            const numLeaves = depth === 2 ? 3 : 5; // Balanced realism density
+            for(let i=0; i<numLeaves; i++) {
+                l.push({
+                    id: `canopy_leaf_${depth}_${i}_${endX}`,
+                    // Microscopic organic noise, visually clamping the leaf DIRECTLY to the wood
+                    x: endX + (rand()*6 - 3),
+                    y: endY + (rand()*6 - 3),
+                    scale: rand() * 0.45 + 0.55,
+                    angle: (rand() * 100) - 50, // Downward gravitational droop
+                    spawnScroll: endScroll + rand()*0.05,
+                    fadeScroll: 999 // Permanent
+                });
+            }
+        }
+        
+        // 3. MATURE MANGO FRUIT (Depth 1)
+        if (depth === 1 && rand() > 0.7 && startScroll > 0.6) {
+           m.push({
+               id: `mango_${endX}_${endY}`,
+               x: endX + (rand()*4 - 2), // Clamped directly to the terminal twig
+               y: endY + 8, // Gravity offset hanging below the twig
+               scale: rand() * 0.4 + 0.6,
+               spawnScroll: endScroll + 0.12
+           });
+        }
+
+        // ==========================================
+        // STRUCTURAL MACRO-MORPHOLOGY (True Botanical Fractal)
+        // ==========================================
+        let numChildren = 0;
+        let angleSpread = 0;
+        let lenMultiplier = 0.8;
+
+        if (depth >= 6) {
+            // SAPLING / TRUNK: Strong vertical growth, zero branching
+            numChildren = 1;
+            angleSpread = 0.1; // Very subtle organic lean
+            lenMultiplier = 0.9;
+        } else if (depth === 5) {
+            // CANOPY ANCHOR: The trunk branches aesthetically into 3 major boughs
+            numChildren = 3;
+            angleSpread = 1.0; // Clean, wide biological split
+            lenMultiplier = 0.85;
+        } else {
+            // UPPER CANOPY: True recursive bifurcating fractal tree physics
+            numChildren = 2; // Strict splitting prevents chaotic "messy" branching
+            angleSpread = 0.8;
+            lenMultiplier = 0.75; // Shorter twigs as they reach the top
+        }
+
+        for(let i=0; i<numChildren; i++) {
+            let newAngle = angle;
+            if (numChildren > 1) {
+                // Generate a perfectly symmetric burst, adjusted with microlimit organic noise
+                const step = angleSpread / (numChildren - 1);
+                newAngle = angle - (angleSpread / 2) + (step * i);
+                newAngle += (rand() * 0.1 - 0.05); // Organic biological variance
+            } else {
+                newAngle += (rand() * angleSpread - angleSpread/2);
+            }
+            
+            const newLength = length * (lenMultiplier + (rand()*0.1 - 0.05));
+            buildBranch(endX, endY, newLength, newAngle, depth - 1, endScroll);
+        }
+    };
+
+    // Stage 1 (Seed -> Sapling) triggers at 5% scroll
+    buildBranch(400, 900, 130, 0, 8, 0.05);
+
+    return { branches: b, leaves: l, mangoes: m };
+  }, []);
+
+  // Stage 1: The Mango Seed Physics
+  const seedOpacity = useTransform(scrollYProgress, [0, 0.15, 0.25], [1, 1, 0]);
+  const seedScale = useTransform(scrollYProgress, [0, 0.1], [0.8, 1]);
+
+  // Special Branch Component to handle localized VFX aging natively
+  const DynamicBranch = ({ b }) => {
+     const draw = useTransform(scrollYProgress, [b.startScroll, b.endScroll], [0, 1]);
+     const visibility = useTransform(scrollYProgress, [b.startScroll - 0.001, b.startScroll], [0, 1]);
+     
+     // Plant Physics: The trunk genuinely ages from a green sapling plant to a woody brown tree
+     const currentColor = useTransform(
+         scrollYProgress, 
+         [b.startScroll, b.startScroll + 0.3], 
+         [plantGreen, woodColor]
+     );
+
+     return (
+        <motion.line 
+            x1={b.x1} y1={b.y1} x2={b.x2} y2={b.y2}
+            strokeWidth={b.width}
+            strokeLinecap="round"
+            className="transition-opacity duration-100"
             style={{ 
-              top: `${top}%`, 
-              left: `${left}%`, 
-              width: size, 
-              height: size,
-              animation: `twinkle ${duration}s infinite ${delay}s ease-in-out`
+                stroke: currentColor,
+                pathLength: draw,
+                opacity: visibility 
             }}
+        />
+     );
+  };
+
+  const DynamicLeaf = ({ l }) => {
+     const scale = useTransform(scrollYProgress, [l.spawnScroll, l.spawnScroll + 0.08], [0, l.scale]);
+     // Sapling leaves fadeout when fadeScroll is triggered; Canopy leaves never fade
+     const opacity = useTransform(
+         scrollYProgress, 
+         [l.spawnScroll - 0.001, l.spawnScroll, l.fadeScroll, l.fadeScroll + 0.1], 
+         [0, 1, 1, 0]
+     );
+
+     return (
+        <motion.path 
+            // Authentic Lanceolate Leaf (Tapered, elongated teardrop)
+            d="M 0 0 C -12 25 -15 60 0 90 C 15 60 12 25 0 0 Z"
+            fill={leafColor}
+            style={{ 
+                x: l.x, y: l.y,
+                scale: scale,
+                rotate: `${l.angle}deg`,
+                originX: 0.5, originY: 0,
+                opacity: opacity
+            }}
+        />
+     );
+  };
+
+  return (
+    <div className="fixed right-[-5%] lg:right-[0%] bottom-0 w-[50vw] max-w-[700px] h-[95vh] pointer-events-none z-10 overflow-visible drop-shadow-2xl">
+      <motion.svg
+        viewBox="0 0 800 1000"
+        className="w-full h-full overflow-visible"
+        preserveAspectRatio="xMidYMax meet"
+      >
+        <defs>
+          <filter id="mangoGlow">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+
+        {/* STAGE 1: MANGO SEED POUCH */}
+        <motion.g style={{ opacity: seedOpacity, scale: seedScale, originX: 0.5, originY: 1, x: 370, y: 880 }}>
+          <path 
+            d="M 0 30 C 15 0 50 -10 75 15 C 100 40 85 70 45 60 C 20 45 0 55 0 30 Z" 
+            fill={isDarkMode ? "#78716c" : "#d6d3d1"} 
+            stroke={isDarkMode ? "#44403c" : "#a8a29e"} 
+            strokeWidth="3" 
           />
-        );
-      })}
+          <path d="M 15 30 Q 40 20 60 30 M 20 45 Q 40 35 55 45 M 10 20 Q 30 5 50 10" stroke={isDarkMode ? "#57534e" : "#a8a29e"} strokeWidth="1" fill="none" />
+        </motion.g>
+
+        {/* BRANCHNODES: Trunk, Stems, and Canopy */}
+        {branches.map(b => <DynamicBranch key={b.id} b={b} />)}
+
+        {/* FOLIAGE: Lanceolate Growth */}
+        {leaves.map(l => <DynamicLeaf key={l.id} l={l} />)}
+
+        {/* FRUIT: Mature Golden Mangoes */}
+        {mangoes.map((m) => {
+           const scale = useTransform(scrollYProgress, [m.spawnScroll, m.spawnScroll + 0.1], [0, m.scale]);
+           const opacity = useTransform(scrollYProgress, [m.spawnScroll - 0.001, m.spawnScroll], [0, 1]);
+           return (
+             <motion.g 
+               key={m.id} 
+               style={{ x: m.x, y: m.y, scale: scale, opacity: opacity, originX: 0.5, originY: 0 }}
+               filter="url(#mangoGlow)"
+             >
+               <path d="M 0 5 C 22 5 35 30 25 55 C 10 75 -15 65 -22 40 C -30 15 -15 5 0 5 Z" fill="#f59e0b" />
+               <circle cx="-5" cy="20" r="14" fill="#10b981" opacity="0.4" filter="blur(4px)" />
+               <circle cx="12" cy="35" r="16" fill="#ef4444" opacity="0.45" filter="blur(6px)" />
+               <circle cx="-12" cy="45" r="8" fill="#10b981" opacity="0.3" filter="blur(3px)" />
+               <line x1="0" y1="5" x2="3" y2="-8" stroke="#451a03" strokeWidth="2.5" />
+             </motion.g>
+           );
+        })}
+      </motion.svg>
     </div>
   );
 };
 
 const PersistentVFX = ({ isDarkMode }) => {
   const { scrollYProgress } = useScroll();
-
-  // Sequential, layered structural growth based on scroll progress
-  const trunkLength = useSpring(useTransform(scrollYProgress, [0, 0.4], [0, 1]), { stiffness: 80, damping: 20 });
-  const branchLength = useSpring(useTransform(scrollYProgress, [0.3, 0.7], [0, 1]), { stiffness: 80, damping: 20 });
-  const subBranchLength = useSpring(useTransform(scrollYProgress, [0.6, 0.9], [0, 1]), { stiffness: 80, damping: 20 });
   
-  const treeOpacity = useTransform(scrollYProgress, [0, 0.01], [0.5, 1]);
-  const leafScale = useTransform(scrollYProgress, [0.7, 1.0], [0, 1]);
-
   return (
     <>
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-[-1] bg-[#020617] will-change-[background-color]">
         
-        {/* Dynamic Daylight Atmosphere */}
+        {/* Dynamic Nighttime Galaxy (Solid Base Layer) */}
+        <div className="absolute inset-0">
+           <div className="absolute inset-0 bg-gradient-to-b from-[#020617] via-[#0f172a] to-[#020617] transition-colors duration-[1500ms]" />
+           <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-indigo-900/40 rounded-full blur-[130px] mix-blend-screen" />
+           <div className="absolute bottom-[20%] right-[-20%] w-[70vw] h-[70vw] bg-fuchsia-900/30 rounded-full blur-[150px] mix-blend-screen" />
+           
+           <Stars isDarkMode={isDarkMode} />
+
+           {/* Midnight Wisps Anchored Left */}
+           <Cloud isDarkMode={true} top={10} left={-5} scale={2.0} duration={30} delay={0} opacity={0.15} />
+           <Cloud isDarkMode={true} top={40} left={10} scale={1.4} duration={40} delay={4} opacity={0.10} />
+           <Cloud isDarkMode={true} top={70} left={0} scale={1.8} duration={45} delay={2} opacity={0.12} />
+        </div>
+
+        {/* Dynamic Daylight Atmosphere (Transitions on top of Night) */}
         <div className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out will-change-opacity ${isDarkMode ? 'opacity-0' : 'opacity-100'}`}>
            <div className="absolute inset-0 bg-gradient-to-b from-[#38bdf8] via-[#bae6fd] to-[#f0f9ff]" />
            <div className="absolute top-[-20%] right-[-10%] w-[70vw] h-[70vw] bg-yellow-200/50 rounded-full blur-[140px] mix-blend-screen animate-pulse will-change-transform" />
@@ -123,79 +372,12 @@ const PersistentVFX = ({ isDarkMode }) => {
            <Cloud isDarkMode={false} top={50} left={-10} scale={2.4} duration={40} delay={5} opacity={0.5} />
            <Cloud isDarkMode={false} top={75} left={5} scale={1.6} duration={30} delay={1} opacity={0.7} />
         </div>
-
-        {/* Dynamic Nighttime Galaxy */}
-        <div className={`absolute inset-0 transition-opacity duration-[1500ms] ease-in-out will-change-opacity ${isDarkMode ? 'opacity-100' : 'opacity-0'}`}>
-           <div className="absolute inset-0 bg-gradient-to-b from-[#020617] via-[#0f172a] to-[#020617]" />
-           <div className="absolute top-[-10%] left-[-10%] w-[60vw] h-[60vw] bg-indigo-900/40 rounded-full blur-[130px] mix-blend-screen" />
-           <div className="absolute bottom-[20%] right-[-20%] w-[70vw] h-[70vw] bg-fuchsia-900/30 rounded-full blur-[150px] mix-blend-screen" />
-           
-           <Stars isDarkMode={isDarkMode} />
-
-           {/* Midnight Wisps Anchored Left */}
-           <Cloud isDarkMode={true} top={10} left={-5} scale={2.0} duration={30} delay={0} opacity={0.15} />
-           <Cloud isDarkMode={true} top={40} left={10} scale={1.4} duration={40} delay={4} opacity={0.10} />
-           <Cloud isDarkMode={true} top={70} left={0} scale={1.8} duration={45} delay={2} opacity={0.12} />
-        </div>
       </div>
 
       <AstralBody isDarkMode={isDarkMode} />
 
-      {/* Tree container locked to the right */}
-      <div className="fixed top-0 right-[-15%] lg:right-[-10%] w-full lg:w-[45%] h-screen pointer-events-none z-0 flex items-end justify-center overflow-visible">
-        <motion.svg 
-          viewBox="0 0 500 600" 
-          className="w-full h-[80%] md:h-[90%] overflow-visible z-10"
-          style={{ opacity: treeOpacity }}
-        >
-          <defs>
-            <linearGradient id="trunkGrad" x1="0" y1="1" x2="0" y2="0">
-              <stop offset="0%" stopColor={isDarkMode ? "#18181b" : "#451a03"} />
-              <stop offset="100%" stopColor={isDarkMode ? "#3f3f46" : "#78350f"} />
-            </linearGradient>
-          </defs>
-
-          {/* TRUNK */}
-          <motion.path d="M 250,600 Q 240,450 250,300" stroke="url(#trunkGrad)" strokeWidth="24" fill="none" style={{ pathLength: trunkLength }} strokeLinecap="round" />
-
-          {/* MAIN BRANCHES */}
-          <motion.path d="M 248,450 Q 180,380 120,320" stroke="url(#trunkGrad)" strokeWidth="14" fill="none" style={{ pathLength: branchLength }} strokeLinecap="round" />
-          <motion.path d="M 255,420 Q 340,360 400,280" stroke="url(#trunkGrad)" strokeWidth="12" fill="none" style={{ pathLength: branchLength }} strokeLinecap="round" />
-          <motion.path d="M 245,350 Q 180,250 100,200" stroke="url(#trunkGrad)" strokeWidth="10" fill="none" style={{ pathLength: branchLength }} strokeLinecap="round" />
-          <motion.path d="M 252,320 Q 320,220 380,150" stroke="url(#trunkGrad)" strokeWidth="9" fill="none" style={{ pathLength: branchLength }} strokeLinecap="round" />
-          <motion.path d="M 250,300 Q 220,150 200,80" stroke="url(#trunkGrad)" strokeWidth="8" fill="none" style={{ pathLength: branchLength }} strokeLinecap="round" />
-          <motion.path d="M 250,300 Q 280,180 300,100" stroke="url(#trunkGrad)" strokeWidth="7" fill="none" style={{ pathLength: branchLength }} strokeLinecap="round" />
-
-          {/* SUB-BRANCHES */}
-          <motion.path d="M 150,350 Q 100,380 60,350" stroke="url(#trunkGrad)" strokeWidth="4" fill="none" style={{ pathLength: subBranchLength }} strokeLinecap="round" />
-          <motion.path d="M 330,370 Q 380,410 440,380" stroke="url(#trunkGrad)" strokeWidth="4" fill="none" style={{ pathLength: subBranchLength }} strokeLinecap="round" />
-          <motion.path d="M 150,230 Q 80,140 40,160" stroke="url(#trunkGrad)" strokeWidth="3" fill="none" style={{ pathLength: subBranchLength }} strokeLinecap="round" />
-          <motion.path d="M 340,190 Q 400,100 450,120" stroke="url(#trunkGrad)" strokeWidth="3" fill="none" style={{ pathLength: subBranchLength }} strokeLinecap="round" />
-          <motion.path d="M 215,130 Q 150,60 120,80" stroke="url(#trunkGrad)" strokeWidth="2" fill="none" style={{ pathLength: subBranchLength }} strokeLinecap="round" />
-          <motion.path d="M 285,140 Q 350,70 380,90" stroke="url(#trunkGrad)" strokeWidth="2" fill="none" style={{ pathLength: subBranchLength }} strokeLinecap="round" />
-
-          {/* LEAVES */}
-          <g fill={isDarkMode ? "#10b981" : "#059669"} opacity={isDarkMode ? 0.8 : 0.9}>
-            <motion.circle cx="120" cy="320" r="15" style={{ scale: leafScale }} />
-            <motion.circle cx="100" cy="200" r="20" style={{ scale: leafScale }} />
-            <motion.circle cx="60" cy="350" r="10" style={{ scale: leafScale }} />
-            <motion.circle cx="40" cy="160" r="14" style={{ scale: leafScale }} />
-            <motion.circle cx="120" cy="80" r="18" style={{ scale: leafScale }} />
-            <motion.circle cx="400" cy="280" r="16" style={{ scale: leafScale }} />
-            <motion.circle cx="380" cy="150" r="22" style={{ scale: leafScale }} />
-            <motion.circle cx="440" cy="380" r="12" style={{ scale: leafScale }} />
-            <motion.circle cx="450" cy="120" r="15" style={{ scale: leafScale }} />
-            <motion.circle cx="380" cy="90" r="17" style={{ scale: leafScale }} />
-            <motion.circle cx="200" cy="80" r="25" style={{ scale: leafScale }} />
-            <motion.circle cx="300" cy="100" r="24" style={{ scale: leafScale }} />
-            <motion.circle cx="180" cy="260" r="18" style={{ scale: leafScale }} />
-            <motion.circle cx="320" cy="240" r="16" style={{ scale: leafScale }} />
-            <motion.circle cx="250" cy="180" r="22" style={{ scale: leafScale }} />
-            <motion.circle cx="210" cy="170" r="14" style={{ scale: leafScale }} />
-            <motion.circle cx="280" cy="150" r="15" style={{ scale: leafScale }} />
-          </g>
-        </motion.svg>
-      </div>
+      {/* True Biological Mango Tree Timeline Matrix */}
+      <MangoTree isDarkMode={isDarkMode} />
     </>
   );
 };
