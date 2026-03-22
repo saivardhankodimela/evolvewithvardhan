@@ -58,8 +58,7 @@ const LogItem = ({ log, index, activeIndex, elementRef }) => {
       ref={ref}
       className={`w-full flex justify-center transition-all duration-700 ease-out py-5 ${isActive ? 'scale-100' : 'scale-95'}`}
       style={{ 
-        height: 'auto',
-        minHeight: '26vh', 
+        height: '320px', 
         opacity, 
         transform: `scale(${scale})`, 
         filter, 
@@ -95,7 +94,7 @@ const LogItem = ({ log, index, activeIndex, elementRef }) => {
               <h3 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white mb-3 tracking-tight group-hover:text-cobalt-600 dark:group-hover:text-cobalt-400 transition-colors">
                 {log.title}
               </h3>
-              <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 font-semibold leading-relaxed">
+              <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 font-semibold leading-relaxed line-clamp-3 md:line-clamp-4">
                 {log.description}
               </p>
             </div>
