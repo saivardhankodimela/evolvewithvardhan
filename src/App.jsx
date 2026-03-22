@@ -22,11 +22,11 @@ function App() {
   }, [isDarkMode]);
 
   return (
-    <div className={`min-h-[150vh] transition-colors duration-1000 ease-in-out font-sans selection:bg-purple-500/30 relative overflow-x-hidden ${isDarkMode ? 'bg-black text-white' : 'bg-white text-zinc-950'}`}>
+    <div className={`min-h-[150vh] transition-colors duration-1000 ease-in-out font-sans selection:bg-purple-500/30 relative overflow-x-hidden ${isDarkMode ? 'text-white' : 'text-zinc-950'}`}>
       
       {/* Floating Ribbon Header (Centered Over Everything) */}
       <div className="fixed top-6 w-full flex justify-center z-50 px-4 pointer-events-none">
-        <nav className="pointer-events-auto flex items-center justify-between px-6 py-3 rounded-full bg-white/60 dark:bg-black/60 backdrop-blur-3xl border border-zinc-200 dark:border-zinc-800 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] w-full max-w-4xl transition-all duration-300">
+        <nav className="pointer-events-auto flex items-center justify-between px-6 py-3 rounded-full glass-light dark:glass-dark w-full max-w-4xl transition-all duration-300">
           <div className="flex items-center gap-3 pr-8 border-r border-zinc-200 dark:border-zinc-800 hidden md:flex">
             <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-zinc-800 to-black dark:from-white dark:to-zinc-300 flex items-center justify-center shadow-sm">
               <div className="w-1.5 h-3 rounded-full bg-white dark:bg-black opacity-80"></div>
@@ -40,7 +40,6 @@ function App() {
               <li><a href="#home" className="hover:text-black dark:hover:text-white transition-colors">Home</a></li>
               <li><a href="#work" className="hover:text-black dark:hover:text-white transition-colors">Work</a></li>
               <li><a href="#growth-log" className="hover:text-black dark:hover:text-white transition-colors">Growth Log</a></li>
-              <li className="hidden sm:block"><a href="#home" className="hover:text-black dark:hover:text-white transition-colors">About</a></li>
               <li className="hidden sm:block"><a href="#home" className="hover:text-black dark:hover:text-white transition-colors">Connect</a></li>
             </ul>
           </div>
@@ -62,8 +61,8 @@ function App() {
       {/* Main Content (Perfectly Centered, Z-10 floats above the Tree) */}
       <main className="pt-32 pb-16 px-6 sm:px-12 w-full max-w-4xl mx-auto flex flex-col gap-24 relative z-10">
         <Hero isDarkMode={isDarkMode} />
-        <GrowthTimeline />
         <AppsShowcase />
+        <GrowthTimeline />
       </main>
 
       {/* Footer spans centered column */}

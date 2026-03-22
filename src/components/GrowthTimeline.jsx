@@ -183,15 +183,19 @@ const GrowthTimeline = () => {
           </h2>
         </div>
 
-        {/* Stats & Controls Panel */}
-        <div className="flex flex-wrap items-center gap-4 bg-white/60 dark:bg-[#111111]/80 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-2 shadow-sm">
-           <div className="flex flex-col px-4 py-2 border-r border-slate-200 dark:border-white/10">
+        {/* Premium Dashboard Header (No Wrapping) */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-12 p-6 md:p-8 rounded-[32px] glass-light dark:glass-dark border border-white/50 dark:border-white/10 shadow-lg relative overflow-hidden">
+          
+          <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2" />
+          
+          <div className="flex flex-col sm:flex-row sm:items-center gap-6 flex-nowrap"> {/* Added flex-nowrap here */}
+            <div className="flex flex-col px-4 py-2 border-r border-slate-200 dark:border-white/10">
                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 dark:text-slate-400">Total Logs</span>
                <div className="flex items-center gap-2">
                    <Hash size={14} className="text-cobalt-500" />
                    <span className="text-lg font-black text-slate-900 dark:text-white leading-none">{DATA.logs.length}</span>
                </div>
-           </div>
+            </div>
            
            <div className="flex flex-col px-4 py-2 border-r border-slate-200 dark:border-white/10">
                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 dark:text-slate-400">Latest Entry</span>
@@ -219,11 +223,12 @@ const GrowthTimeline = () => {
                  }
                `}} />
            </div>
-        </div>
+         </div>
+       </div>
       </div>
 
       {/* The Scrollable Glass Block Container */}
-      <div className="relative w-full rounded-[40px] md:rounded-[60px] glass-light dark:glass-dark border border-white/50 dark:border-white/10 shadow-2xl overflow-hidden p-4 md:p-8 bg-slate-50/50 dark:bg-[#0a0a0a]/50">
+      <div className="relative w-full rounded-[40px] md:rounded-[60px] glass-light dark:glass-dark border border-white/50 dark:border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.1)] overflow-hidden p-4 md:p-8">
         
         {/* The Ticker Scroll Container - Removed snap to preserve ordering and remove skipping */}
         <div 
@@ -258,9 +263,9 @@ const GrowthTimeline = () => {
           <div className="h-[30vh] w-full shrink-0" />
         </div>
 
-        {/* Overlay Block Gradients */}
-        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-slate-100 dark:from-[#0a0a0a] to-transparent pointer-events-none z-30 rounded-t-[40px] md:rounded-t-[60px]" />
-        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-slate-100 dark:from-[#0a0a0a] to-transparent pointer-events-none z-30 rounded-b-[40px] md:rounded-b-[60px]" />
+        {/* Overlay Block Gradients - Updated to transparent gradient to stop masking the mesh */}
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-white/20 dark:from-black/40 to-transparent pointer-events-none z-30 rounded-t-[40px] md:rounded-t-[60px]" />
+        <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white/20 dark:from-black/40 to-transparent pointer-events-none z-30 rounded-b-[40px] md:rounded-b-[60px]" />
 
       </div>
 

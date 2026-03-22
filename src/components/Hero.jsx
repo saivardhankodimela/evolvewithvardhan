@@ -40,10 +40,7 @@ const Hero = ({ isDarkMode }) => {
             className="flex flex-col"
           >
             <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.1]">
-              <span className={`bg-clip-text text-transparent bg-gradient-to-br ${isDarkMode ? 'from-white via-zinc-100 to-zinc-500' : 'from-zinc-950 via-zinc-800 to-zinc-500'}`}>Sai </span>
-              <span className={`bg-clip-text text-transparent bg-gradient-to-r ${isDarkMode ? 'from-zinc-300 to-white' : 'from-zinc-950 to-zinc-600'}`}>
-                Svk.
-              </span>
+              <span className={`bg-clip-text text-transparent bg-gradient-to-br ${isDarkMode ? 'from-white via-zinc-100 to-zinc-500' : 'from-zinc-950 via-zinc-800 to-zinc-500'}`}>Sai Vardhan Kodimela.</span>
             </h1>
           </motion.div>
         </div>
