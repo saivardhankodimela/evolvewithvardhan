@@ -4,12 +4,12 @@ import { DATA } from '../utils/data';
 
 const AppsShowcase = () => {
   return (
-    <section className="w-full max-w-5xl mx-auto py-10">
+    <section id="work" className="w-full max-w-5xl mx-auto py-10 scroll-m-24">
       
       {/* Section Header */}
       <div className="mb-12">
-        <h2 className="text-3xl font-bold tracking-tight mb-2">Creations & Apps</h2>
-        <p className="text-slate-500 dark:text-slate-400">Applications currently in development or live.</p>
+        <h2 className="text-3xl font-bold tracking-tight mb-2 text-zinc-900 dark:text-white">Creations & Apps</h2>
+        <p className="text-zinc-500 dark:text-zinc-400">Applications currently in development or live.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

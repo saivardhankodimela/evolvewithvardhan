@@ -19,20 +19,24 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
   :root {
-    --bg-primary: var(--color-slate-50);
-    --text-primary: var(--color-slate-900);
+    --bg-primary: #ffffff;
+    --text-primary: #09090b; /* zinc-950 */
   }
   
   :root.dark {
-    --bg-primary: var(--color-slate-900);
-    --text-primary: var(--color-slate-50);
+    --bg-primary: #000000;
+    --text-primary: #fafafa; /* zinc-50 */
   }
 
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    @apply antialiased transition-colors duration-500;
+    @apply antialiased transition-colors duration-1000;
   }
 }
 

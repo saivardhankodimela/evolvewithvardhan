@@ -29,7 +29,7 @@ const BackgroundSVG = ({ skill }) => {
 };
 
 // Individual Log Item measuring visibility
-const LogItem = ({ log, index, activeIndex, setActiveIndex, elementRef }) => {
+const LogItem = ({ log, index, activeIndex, elementRef }) => {
   const ref = useRef(null);
   
   // Forward the ref safely
@@ -38,20 +38,6 @@ const LogItem = ({ log, index, activeIndex, setActiveIndex, elementRef }) => {
         elementRef.current[index] = ref.current;
     }
   }, [index, elementRef]);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && entry.intersectionRatio > 0.4) {
-          setActiveIndex(index);
-        }
-      },
-      // Give the observer a generous center-box to detect the active item without skipping
-      { root: null, rootMargin: '-25% 0px -25% 0px', threshold: [0.4, 0.5, 0.6] }
-    );
-    if (ref.current) observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [index, setActiveIndex]);
 
   const isActive = index === activeIndex;
   
@@ -93,11 +79,11 @@ const LogItem = ({ log, index, activeIndex, setActiveIndex, elementRef }) => {
           <BackgroundSVG skill={log.skill} />
 
           <div className="relative z-10 w-full flex flex-col justify-center h-full">
-            <div className="flex items-center justify-between mb-4">
-              <span className="px-3 py-1 bg-slate-100 dark:bg-black/40 text-slate-800 dark:text-slate-300 font-mono text-sm tracking-widest font-extrabold rounded-md shadow-sm">
+            <div className="flex flex-wrap items-center gap-3 mb-4">
+              <span className="px-3 py-1 bg-zinc-100 dark:bg-white/10 text-zinc-900 dark:text-white font-mono text-sm tracking-widest font-extrabold rounded-md shadow-sm border border-zinc-200 dark:border-white/5">
                 {log.date}
               </span>
-              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest bg-white dark:bg-black border border-slate-200 dark:border-white/10 px-4 py-1.5 rounded-full shadow-md"
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-widest bg-white dark:bg-black border border-zinc-200 dark:border-white/10 px-4 py-1.5 rounded-full shadow-md"
                     style={{
                       color: log.category === 'Learning' ? '#06b6d4' : log.category === 'Building' ? '#10b981' : '#8b5cf6'
                     }}>
@@ -106,10 +92,10 @@ const LogItem = ({ log, index, activeIndex, setActiveIndex, elementRef }) => {
             </div>
 
             <div className="max-w-[85%]">
-              <h3 className="text-2xl md:text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight group-hover:text-cobalt-600 dark:group-hover:text-cobalt-400 transition-colors">
+              <h3 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white mb-3 tracking-tight group-hover:text-cobalt-600 dark:group-hover:text-cobalt-400 transition-colors">
                 {log.title}
               </h3>
-              <p className="text-sm md:text-base text-slate-800 dark:text-slate-300 font-semibold leading-relaxed">
+              <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 font-semibold leading-relaxed">
                 {log.description}
               </p>
             </div>
@@ -127,14 +113,42 @@ const GrowthTimeline = () => {
   const itemRefs = useRef([]);
   const scrollContainerRef = useRef(null);
 
+  // Math-based precise scroll tracking using Viewport Coordinates
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+    
+    // Find absolute center line of the container on the screen
+    const containerRect = container.getBoundingClientRect();
+    const screenCenterLine = containerRect.top + (containerRect.height / 2);
+    
+    let closestIndex = 0;
+    let minDistance = Infinity;
+    
+    itemRefs.current.forEach((el, index) => {
+       if (!el) return;
+       // Element's center line on the screen
+       const rect = el.getBoundingClientRect();
+       const elCenter = rect.top + (rect.height / 2);
+       const distance = Math.abs(screenCenterLine - elCenter);
+       
+       if (distance < minDistance) {
+          minDistance = distance;
+          closestIndex = index;
+       }
+    });
+    
+    if (closestIndex !== activeIndex) {
+       setActiveIndex(closestIndex);
+    }
+  };
+
   // Focus Log via Date Picker
   const handleDateChange = (e) => {
     const targetDate = e.target.value;
     setSelectedDate(targetDate);
     
     if (targetDate && DATA.logs.length > 0) {
-        // Find closest log matching or before the selected date. Note: dates in DATA are strings like 'Mar 21, 2026'
-        // For simplicity of matching format, we'll format the input YYYY-MM-DD to a sortable metric.
         const targetTime = new Date(targetDate).getTime();
         
         let closestIndex = 0;
@@ -149,9 +163,12 @@ const GrowthTimeline = () => {
             }
         });
 
-        // Scroll that element into the center of the viewport
         if (itemRefs.current[closestIndex] && scrollContainerRef.current) {
-            itemRefs.current[closestIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Scroll element precisely to center
+            const container = scrollContainerRef.current;
+            const el = itemRefs.current[closestIndex];
+            const scrollPos = el.offsetTop - (container.clientHeight / 2) + (el.clientHeight / 2);
+            container.scrollTo({ top: scrollPos, behavior: 'smooth' });
         }
     }
   };
@@ -212,6 +229,7 @@ const GrowthTimeline = () => {
         {/* The Ticker Scroll Container - Removed snap to preserve ordering and remove skipping */}
         <div 
              ref={scrollContainerRef}
+             onScroll={handleScroll}
              className="relative h-[70vh] w-full overflow-y-auto scroll-smooth pr-2 md:pr-4 container-scroll" 
              style={{
                scrollbarWidth: 'thin',
@@ -233,7 +251,6 @@ const GrowthTimeline = () => {
                 log={log} 
                 index={i} 
                 activeIndex={activeIndex} 
-                setActiveIndex={setActiveIndex} 
                 elementRef={itemRefs}
               />
             ))}

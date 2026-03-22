@@ -4,16 +4,15 @@ import Hero from './components/Hero';
 import GrowthTimeline from './components/GrowthTimeline';
 import AppsShowcase from './components/AppsShowcase';
 import Footer from './components/Footer';
+import PersistentVFX from './components/PersistentVFX';
 
 function App() {
-  const [isDarkMode, setIsDarkMode] = useState(true); // Default to Dark 
+  const [isDarkMode, setIsDarkMode] = useState(true);
 
-  // Toggle Theme Logic
   const toggleTheme = () => {
     setIsDarkMode((prev) => !prev);
   };
 
-  // Sync with document element for Tailwind dark mode
   useEffect(() => {
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -23,32 +22,28 @@ function App() {
   }, [isDarkMode]);
 
   return (
-    // The cinematic sunrise/sunset transition is handled by background color easing
-    <div className="min-h-screen font-sans selection:bg-cobalt-500/30 bg-slate-50 dark:bg-[#0a0a0a] transition-colors duration-[1500ms] ease-in-out text-slate-900 dark:text-slate-50">
+    <div className={`min-h-[150vh] transition-colors duration-1000 ease-in-out font-sans selection:bg-purple-500/30 relative overflow-x-hidden ${isDarkMode ? 'bg-black text-white' : 'bg-white text-zinc-950'}`}>
       
-      {/* Floating Ribbon Header */}
+      {/* Floating Ribbon Header (Centered Over Everything) */}
       <div className="fixed top-6 w-full flex justify-center z-50 px-4 pointer-events-none">
-        <nav className="pointer-events-auto flex items-center justify-between px-6 py-3 rounded-full glass-light dark:glass-dark border border-white/40 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.1)] w-full max-w-4xl transition-all duration-300">
-          
-          <div className="flex items-center gap-3 pr-8 border-r border-slate-300/50 dark:border-white/10 hidden md:flex">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-600 flex items-center justify-center shadow-[0_0_10px_rgba(16,185,129,0.4)]">
-              <div className="w-1.5 h-3 rounded-full bg-white opacity-80"></div>
+        <nav className="pointer-events-auto flex items-center justify-between px-6 py-3 rounded-full bg-white/60 dark:bg-black/60 backdrop-blur-3xl border border-zinc-200 dark:border-zinc-800 shadow-[0_8px_32px_rgba(0,0,0,0.05)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.5)] w-full max-w-4xl transition-all duration-300">
+          <div className="flex items-center gap-3 pr-8 border-r border-zinc-200 dark:border-zinc-800 hidden md:flex">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-zinc-800 to-black dark:from-white dark:to-zinc-300 flex items-center justify-center shadow-sm">
+              <div className="w-1.5 h-3 rounded-full bg-white dark:bg-black opacity-80"></div>
             </div>
-            <span className="font-bold tracking-tight text-slate-800 dark:text-slate-100 font-sans">
+            <span className="font-bold tracking-tight text-zinc-900 dark:text-white font-sans">
               Grow with Vardhan
             </span>
           </div>
-
           <div className="flex-1 flex justify-center md:px-8">
-            <ul className="flex items-center gap-4 sm:gap-8 text-sm font-semibold text-slate-600 dark:text-slate-300">
-              <li><a href="#home" className="hover:text-cobalt-600 dark:hover:text-cobalt-400 transition-colors">Home</a></li>
-              <li><a href="#work" className="hover:text-cobalt-600 dark:hover:text-cobalt-400 transition-colors">Work</a></li>
-              <li><a href="#growth-log" className="hover:text-cobalt-600 dark:hover:text-cobalt-400 transition-colors">Growth Log</a></li>
-              <li className="hidden sm:block"><a href="#about" className="hover:text-cobalt-600 dark:hover:text-cobalt-400 transition-colors">About</a></li>
-              <li className="hidden sm:block"><a href="#connect" className="hover:text-cobalt-600 dark:hover:text-cobalt-400 transition-colors">Connect</a></li>
+            <ul className="flex items-center gap-4 sm:gap-8 text-sm font-semibold text-zinc-500 dark:text-zinc-400">
+              <li><a href="#home" className="hover:text-black dark:hover:text-white transition-colors">Home</a></li>
+              <li><a href="#work" className="hover:text-black dark:hover:text-white transition-colors">Work</a></li>
+              <li><a href="#growth-log" className="hover:text-black dark:hover:text-white transition-colors">Growth Log</a></li>
+              <li className="hidden sm:block"><a href="#home" className="hover:text-black dark:hover:text-white transition-colors">About</a></li>
+              <li className="hidden sm:block"><a href="#home" className="hover:text-black dark:hover:text-white transition-colors">Connect</a></li>
             </ul>
           </div>
-
           <div className="pl-4 sm:pl-8 border-l border-slate-300/50 dark:border-white/10">
             <button
               onClick={toggleTheme}
@@ -61,14 +56,20 @@ function App() {
         </nav>
       </div>
 
-      {/* Main Content Area */}
-      <main className="pt-32 pb-16 px-6 max-w-5xl mx-auto flex flex-col gap-24 relative z-10">
+      {/* Persistent Global VFX (Stays fixed on the right half of the screen) */}
+      <PersistentVFX isDarkMode={isDarkMode} />
+
+      {/* Main Content (Perfectly Centered, Z-10 floats above the Tree) */}
+      <main className="pt-32 pb-16 px-6 sm:px-12 w-full max-w-4xl mx-auto flex flex-col gap-24 relative z-10">
         <Hero isDarkMode={isDarkMode} />
         <GrowthTimeline />
         <AppsShowcase />
       </main>
 
-      <Footer />
+      {/* Footer spans centered column */}
+      <div className="w-full max-w-4xl mx-auto px-6 sm:px-12 relative z-10 pb-8">
+        <Footer />
+      </div>
 
     </div>
   );
