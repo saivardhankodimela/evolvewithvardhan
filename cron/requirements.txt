@@ -1,0 +1,4 @@
+notion-client
+langgraph
+langchain-core
+python-dotenv
