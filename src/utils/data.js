@@ -4,12 +4,22 @@
 export const DATA = {
   "logs": [
     {
+      "id": 2,
+      "date": "24 March 2026",
+      "title": "Updated Readme and Visual Worklog",
+      "category": "Building",
+      "skill": "github",
+      "description": "added documents like readme and visual worklogs to have proof of work which I have gone through developing this app in antigravity ide.",
+      "status": "Active"
+    },
+    {
       "id": 1,
-      "date": "2026-03-23",
+      "date": "23 March 2026",
       "title": "Collaborated with Antigravity AI",
       "category": "Building",
       "skill": "googlegemini",
-      "description": "Worked with Google Deepmind\u2019s Antigravity agent ide to architect, secure, and deploy a seamless LangGraph GitOps sync pipeline for Evolve with Vardhan."
+      "description": "Worked with Google Deepmind\u2019s Antigravity agent ide to architect, secure, and deploy a seamless LangGraph GitOps sync pipeline for Evolve with Vardhan.",
+      "status": "Active"
     }
   ],
   "apps": [
