@@ -30,6 +30,7 @@ jobs:
       env:
         NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
         NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+        NOTION_APPS_DATABASE_ID: ${{ secrets.NOTION_APPS_DATABASE_ID }}
       run: |
         python cron/sync.py
         

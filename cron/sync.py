@@ -14,6 +14,7 @@ load_dotenv()
 
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 DATABASE_ID = os.getenv("NOTION_DATABASE_ID")
+APPS_DATABASE_ID = os.getenv("NOTION_APPS_DATABASE_ID")
 
 # Absolute path targeting the frontend React data object
 DATA_FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "src", "utils", "data.js")
@@ -21,6 +22,7 @@ DATA_FILE_PATH = os.path.join(os.path.dirname(__file__), "..", "src", "utils", "
 class AgentState(TypedDict):
     local_data: Dict[str, Any]
     notion_entries: List[Dict[str, Any]]
+    notion_apps: List[Dict[str, Any]]
     merged_data: Dict[str, Any]
     error: str
 
@@ -38,18 +40,16 @@ def fetch_notion_updates(state: AgentState) -> AgentState:
             "category": "Building",
             "skill": "python",
             "description": "Wrote the GitOps pipeline. Testing zero-day XSS vulnerability defense: \"; alert('MALICIOUS INJECTION'); //"
-        }]}
+        }], "notion_apps": []}
         
     try:
         notion = Client(auth=NOTION_TOKEN)
-        # Filters can be added here for pure 'last 24 hr' incremental sync scaling
         results = notion.databases.query(database_id=DATABASE_ID).get("results")
         
         parsed_entries = []
         for row in results:
             props = row["properties"]
             try:
-                # Rigorous schema mapping. Fails safely on malformed API responses.
                 entry = {
                     "id": props.get("ID", {}).get("number", 0),
                     "date": props.get("Date", {}).get("date", {}).get("start", ""),
@@ -62,7 +62,27 @@ def fetch_notion_updates(state: AgentState) -> AgentState:
             except Exception as e:
                 logging.error(f"Error mapping Notion row {row['id']}: {e}")
                 
-        return {"notion_entries": parsed_entries}
+        # --- FETCH APPS IF APPS_DATABASE_ID IS SET ---
+        parsed_apps = []
+        if APPS_DATABASE_ID:
+            logging.info("Fetching static creations from Apps state database...")
+            app_results = notion.databases.query(database_id=APPS_DATABASE_ID).get("results")
+            for row in app_results:
+                a_props = row["properties"]
+                try:
+                    app_entry = {
+                        "id": a_props.get("ID", {}).get("number", 0),
+                        "name": "".join([t["plain_text"] for t in a_props.get("Name", {}).get("title", [])]),
+                        "description": "".join([t["plain_text"] for t in a_props.get("Description", {}).get("rich_text", [])]),
+                        "status": a_props.get("Status", {}).get("select", {}).get("name", "Stealth"),
+                        "link": a_props.get("Link", {}).get("url", "#"),
+                        "themeColor": a_props.get("Theme", {}).get("select", {}).get("name", "from-emerald-500/20 to-teal-500/20")
+                    }
+                    parsed_apps.append(app_entry)
+                except Exception as e:
+                    logging.error(f"Error mapping Notion App row {row['id']}: {e}")
+                    
+        return {"notion_entries": parsed_entries, "notion_apps": parsed_apps}
 
     except Exception as e:
         state["error"] = f"Notion API Connection error: {str(e)}"
@@ -188,6 +208,20 @@ def merge_diff_safely(state: AgentState) -> AgentState:
     merged_logs.sort(key=lambda x: x["id"], reverse=True)
     
     local_data["logs"] = merged_logs
+    
+    # --- MERGE APPS SAFELY ---
+    notion_apps = state.get("notion_apps", [])
+    if notion_apps:
+        # Avoid overriding Apps that are not in Notion
+        existing_apps = {app["id"]: app for app in local_data.get("apps", []) if "id" in app}
+        for n_app in notion_apps:
+            existing_apps[n_app["id"]] = n_app
+        
+        updated_apps = list(existing_apps.values())
+        updated_apps.sort(key=lambda x: x["id"], reverse=True)
+        local_data["apps"] = updated_apps
+        logging.info(f"Merged {len(notion_apps)} dynamic apps from Notion schema.")
+        
     return {"merged_data": local_data}
 
 def write_secure_js(state: AgentState) -> AgentState:
