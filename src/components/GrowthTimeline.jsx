@@ -94,7 +94,7 @@ const LogItem = ({ log, index, activeIndex, elementRef }) => {
               <h3 className="text-2xl md:text-3xl font-black text-zinc-900 dark:text-white mb-3 tracking-tight group-hover:text-cobalt-600 dark:group-hover:text-cobalt-400 transition-colors">
                 {log.title}
               </h3>
-              <p className="text-sm md:text-base text-zinc-600 dark:text-zinc-400 font-semibold leading-relaxed line-clamp-3 md:line-clamp-4">
+              <p className="text-sm md:text-base text-slate-800 dark:text-slate-200 font-bold leading-relaxed line-clamp-3 md:line-clamp-4">
                 {log.description}
               </p>
             </div>
@@ -249,15 +249,25 @@ const GrowthTimeline = () => {
           <div className="h-[20vh] w-full shrink-0" />
           
           <div className="flex flex-col items-center relative z-10 w-full">
-            {DATA.logs.map((log, i) => (
-              <LogItem 
-                key={log.id} 
-                log={log} 
-                index={i} 
-                activeIndex={activeIndex} 
-                elementRef={itemRefs}
-              />
-            ))}
+            {DATA.logs.length === 0 ? (
+              <div className="text-center py-20 flex flex-col items-center justify-center">
+                <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center mb-4">
+                  <Hash size={24} className="text-purple-500 animate-bounce" />
+                </div>
+                <p className="text-xl font-bold text-zinc-800 dark:text-white mb-2">Syncing Your Logs...</p>
+                <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm">Create and share records inside your Notion database. The GitOps pipeline will automatically render them securely tonight.</p>
+              </div>
+            ) : (
+              DATA.logs.map((log, i) => (
+                <LogItem 
+                  key={log.id} 
+                  log={log} 
+                  index={i} 
+                  activeIndex={activeIndex} 
+                  elementRef={itemRefs}
+                />
+              ))
+            )}
           </div>
 
           <div className="h-[30vh] w-full shrink-0" />
