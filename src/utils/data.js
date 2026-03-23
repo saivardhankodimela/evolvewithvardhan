@@ -10,7 +10,7 @@ export const DATA = {
       "category": "Building",
       "skill": "github",
       "description": "added documents like readme and visual worklogs to have proof of work which I have gone through developing this app in antigravity ide.",
-      "status": "Active"
+      "visibility": "Visible"
     },
     {
       "id": 1,
@@ -19,7 +19,7 @@ export const DATA = {
       "category": "Building",
       "skill": "googlegemini",
       "description": "Worked with Google Deepmind\u2019s Antigravity agent ide to architect, secure, and deploy a seamless LangGraph GitOps sync pipeline for Evolve with Vardhan.",
-      "status": "Active"
+      "visibility": "Visible"
     }
   ],
   "apps": [
@@ -29,7 +29,8 @@ export const DATA = {
       "description": "A cinematic, high-performance portfolio driven by dynamic Framer Motion and securely synced with Notion using LangGraph.",
       "status": "Live",
       "link": "https://evolvewithvardhan.vercel.app/",
-      "themeColor": "from-emerald-500/20 to-teal-500/20"
+      "themeColor": "from-emerald-500/20 to-teal-500/20",
+      "visibility": "Visible"
     }
   ],
   "social": {
