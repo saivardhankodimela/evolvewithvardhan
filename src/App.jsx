@@ -34,11 +34,11 @@ function App() {
             </span>
           </div>
           <div className="flex-1 flex justify-center md:px-8">
-            <ul className="flex items-center gap-4 sm:gap-8 text-sm font-semibold text-zinc-500 dark:text-zinc-400">
-              <li><a href="#home" className="hover:text-black dark:hover:text-white transition-colors">Home</a></li>
-              <li><a href="#work" className="hover:text-black dark:hover:text-white transition-colors">Work</a></li>
-              <li><a href="#growth-log" className="hover:text-black dark:hover:text-white transition-colors">Growth Log</a></li>
-              <li className="hidden sm:block"><a href="#home" className="hover:text-black dark:hover:text-white transition-colors">Connect</a></li>
+            <ul className="flex items-center gap-4 sm:gap-8 text-sm font-bold text-zinc-800 dark:text-zinc-200">
+              <li><a href="#home" className="hover:text-cobalt-500 dark:hover:text-cobalt-400 transition-colors">Home</a></li>
+              <li><a href="#work" className="hover:text-cobalt-500 dark:hover:text-cobalt-400 transition-colors">Work</a></li>
+              <li><a href="#growth-log" className="hover:text-cobalt-500 dark:hover:text-cobalt-400 transition-colors">Growth Log</a></li>
+              <li className="hidden sm:block"><a href="#home" className="hover:text-cobalt-500 dark:hover:text-cobalt-400 transition-colors">Connect</a></li>
             </ul>
           </div>
           <div className="pl-4 sm:pl-8 border-l border-slate-300/50 dark:border-white/10">

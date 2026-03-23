@@ -3,28 +3,20 @@ import { DATA } from '../utils/data';
 import { siReact, siPython, siFramer } from 'simple-icons/icons';
 import { CalendarDays, Hash } from 'lucide-react';
 
-// Localized SVG Background Component
-const BackgroundSVG = ({ skill }) => {
+// Localized SVG Background Component using Dynamic CDN
+const BackgroundSVG = ({ skill, active }) => {
   if (!skill) return null;
   
-  let path = '';
-  let color = '';
-  switch (skill) {
-    case 'react': path = siReact.path; color = '#06b6d4'; break; 
-    case 'python': path = siPython.path; color = '#8b5cf6'; break; 
-    case 'framer': path = siFramer.path; color = '#10b981'; break; 
-    default: return null;
-  }
-  
+  // High-End SimpleIcons CDN injection allows adding ANY slug code-free from Notion!
   return (
-    <svg 
-      viewBox="0 0 24 24" 
-      className="absolute -right-8 top-1/2 -translate-y-1/2 w-[250px] h-[250px] md:w-[350px] md:h-[350px] pointer-events-none z-0 opacity-10 dark:opacity-[0.15] transition-all duration-700 group-hover:scale-110 group-hover:rotate-12" 
-      style={{ fill: color }} 
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d={path} />
-    </svg>
+    <div className="absolute -right-8 top-1/2 -translate-y-1/2 w-[250px] h-[250px] md:w-[320px] md:h-[320px] pointer-events-none z-0 opacity-5 dark:opacity-10 transition-all duration-700 group-hover:scale-110 group-hover:rotate-12 flex items-center justify-center">
+      <img 
+        src={`https://cdn.simpleicons.org/${skill}`} 
+        className="w-full h-full object-contain filter grayscale dark:invert"
+        alt=""
+        onError={(e) => e.target.style.display = 'none'} // Safe fallback for malformed slugs
+      />
+    </div>
   );
 };
 

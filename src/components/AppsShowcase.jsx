@@ -16,7 +16,7 @@ const AppsShowcase = () => {
         {DATA.apps.length === 0 ? (
           <div className="col-span-1 md:col-span-2 text-center py-12 rounded-2xl border border-dashed border-zinc-300 dark:border-zinc-800 flex flex-col items-center justify-center">
             <p className="text-zinc-500 dark:text-zinc-400 font-semibold mb-2">No active creations added yet.</p>
-            <p className="text-xs text-zinc-400 dark:text-zinc-500">Edit <code className="bg-zinc-100 dark:bg-white/5 px-2 py-1 rounded">src/utils/data.js</code> manual `apps` array to list your creations.</p>
+            <p className="text-xs text-zinc-400 dark:text-zinc-500">Your dynamic app builds will securely render here linked from Notion.</p>
           </div>
         ) : (
           DATA.apps.map((app, i) => (
