@@ -117,62 +117,20 @@ def parse_local_data(state: AgentState) -> AgentState:
                 logging.info("Detected secure JSON syntax. Local state parsed.")
                 return {"local_data": local_data}
             except json.JSONDecodeError:
-                pass # Legacy hand-written JS detected. Proceed to hard-transition block.
-                
-        #  LEGACY TRANSITION: The first sync forces hand-typed JS into strict immutable JSON.
-        logging.info("Legacy JS formatting detected. Initializing transition to strict JSON schema.")
-        local_data = {
-            "logs": [
-                {
-                    "id": 1,
-                    "date": "Mar 21, 2026",
-                    "title": "Setup Architecture & Deployment CI",
-                    "category": "Building",
-                    "skill": "react",
-                    "description": "Established the React + Tailwind v4 environment locally and initialized the Vite development server routing to test new Glassmorphism themes."
-                },
-                {
-                    "id": 2,
-                    "date": "Mar 20, 2026",
-                    "title": "Explored LangGraph Agent Orchestration",
-                    "category": "Learning",
-                    "skill": "python",
-                    "description": "Tested multi-agent architectures using LangGraph strictly to orchestrate workflows involving document scraping and recursive summarization bots."
-                },
-                {
-                    "id": 3,
-                    "date": "Mar 18, 2026",
-                    "title": "Testing Framer Motion Dynamics",
-                    "category": "Experimenting",
-                    "skill": "framer",
-                    "description": "Built heavily animated scroll-linked UI elements referencing the “Terminal Industries” design aesthetics. Optimized DOM for 60fps renders."
+                # If reading standard hand-written JS file arrays fails once, 
+                # we fall back to absolute empty lists so no dummy data is inserted!
+                logging.warning("Falling back to empty datasets to cleanse placeholders.")
+                return {
+                    "local_data": {
+                        "logs": [],
+                        "apps": [],
+                        "social": {
+                            "linkedin": "https://linkedin.com/in/sai-vardhan-kodimela",
+                            "github": "https://github.com/saivardhankodimela",
+                            "email": "https://mail.google.com/mail/?view=cm&fs=1&to=saivardhankodimela@gmail.com"
+                        }
+                    }
                 }
-            ],
-            "apps": [
-                {
-                    "id": 1,
-                    "name": "Agentic Workflow Hub",
-                    "description": "A dashboard tracking active LangGraph Python agents running on local cron schedules.",
-                    "status": "Live",
-                    "link": "#",
-                    "themeColor": "from-emerald-500/20 to-teal-500/20"
-                },
-                {
-                    "id": 2,
-                    "name": "Glassmorphism UI Kit",
-                    "description": "An open-source library of Tailwind CSS components utilizing L2 Frosted Pearl techniques.",
-                    "status": "Building",
-                    "link": "#",
-                    "themeColor": "from-cobalt-500/20 to-blue-500/20"
-                }
-            ],
-            "social": {
-                "linkedin": "https://linkedin.com/in/sai-vardhan-kodimela",
-                "github": "https://github.com/saivardhan",
-                "email": "mailto:contact@saivardhan.com"
-            }
-        }
-        return {"local_data": local_data}
         
     except Exception as e:
         state["error"] = f"Local parsing fatality: {str(e)}"
@@ -180,26 +138,55 @@ def parse_local_data(state: AgentState) -> AgentState:
 
 def merge_diff_safely(state: AgentState) -> AgentState:
     """
-    Merging Logic Core: Mirror Sync enabled.
-    Replaces local arrays with fetched Notion values to support Deletions.
+    Merging Logic Core.
+     SECURITY POLICY (Accidental Deletion Defense):
+    We strictly iterate and map incoming Notion IDs. If a local ID is *missing* from Notion, 
+    we do ABSOLUTELY NOTHING. That log entry will survive permanently in Git. Notion is only allowed 
+    to append or overwrite, NEVER delete from disk!
     """
     logging.info("State Node: merge_diff_safely")
     if "error" in state: return state
     
     notion_entries = state.get("notion_entries", [])
-    notion_apps = state.get("notion_apps", [])
     local_data = state.get("local_data", {})
+    local_logs = local_data.get("logs", [])
     
-    # Full Mirror Overwrite (allows deleting straight from Notion)
-    local_data["logs"] = notion_entries
-    local_data["apps"] = notion_apps
+    # 1. Map existing entries to defend them
+    existing_map = {log["id"]: log for log in local_logs if "id" in log}
     
-    # Sort backwards using ID to match Timeline visuals
-    local_data["logs"].sort(key=lambda x: x.get("id", 0), reverse=True)
-    local_data["apps"].sort(key=lambda x: x.get("id", 0), reverse=True)
+    # 2. Safely superimpose the incoming Notion data array
+    added_count = 0
+    updated_count = 0
     
-    logging.info(f"Mirror Sync complete: {len(notion_entries)} Logs, {len(notion_apps)} Apps.")
-    return {"merged_data": local_data}
+    for entry in notion_entries:
+        target_id = entry.get("id")
+        if not target_id: continue
+        
+        if target_id in existing_map:
+            updated_count += 1
+        else:
+            added_count += 1
+        existing_map[target_id] = entry
+        
+    # React expects logs sequentially
+    merged_logs = list(existing_map.values())
+    merged_logs.sort(key=lambda x: x.get("id", 0), reverse=True)
+    local_data["logs"] = merged_logs
+    
+    # --- MERGE APPS SAFELY ---
+    notion_apps = state.get("notion_apps", [])
+    local_apps = local_data.get("apps", [])
+    existing_apps = {app["id"]: app for app in local_apps if "id" in app}
+    
+    for n_app in notion_apps:
+        existing_apps[n_app["id"]] = n_app
+        
+    merged_apps = list(existing_apps.values())
+    merged_apps.sort(key=lambda x: x.get("id", 0), reverse=True)
+    local_data["apps"] = merged_apps
+    
+    state["merged_data"] = local_data
+    return state
 
 def write_secure_js(state: AgentState) -> AgentState:
     """Exports data back to React. Employs literal JSON dumps to eradicate injection vulnerabilities."""
