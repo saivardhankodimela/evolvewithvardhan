@@ -40,5 +40,5 @@ jobs:
         git config --global user.name "Notion LangGraph Bot"
         git config --global user.email "bot@saivardhan.com"
         git add src/utils/data.js
-        # Only commit if data physically changed
-        git diff --quiet && git diff --staged --quiet || (git commit -m "chore: Auto-sync GitOps database state from Notion UI" && git push)
+        # Pull latest commits before pushing to avoid fast-forward rejections
+        git diff --quiet && git diff --staged --quiet || (git commit -m "chore: Auto-sync GitOps database state from Notion UI" && git pull --rebase origin main && git push)
