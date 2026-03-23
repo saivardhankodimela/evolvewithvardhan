@@ -28,7 +28,7 @@ function App() {
       <div className="fixed top-6 w-full flex justify-center z-50 px-4 pointer-events-none">
         <nav className="pointer-events-auto flex items-center justify-between px-6 py-3 rounded-full glass-light dark:glass-dark w-full max-w-4xl transition-all duration-300">
           <div className="flex items-center gap-3 pr-8 border-r border-zinc-200 dark:border-zinc-800 hidden md:flex">
-            <Leaf className="w-6 h-6 text-emerald-500 animate-pulse" />
+            <img src="/favicon.svg" className="w-6 h-6 object-contain filter drop-shadow-[0_0_5px_rgba(52,211,153,0.3)]" alt="Logo" />
             <span className="font-bold tracking-tight text-zinc-900 dark:text-white font-sans">
               Evolve with Vardhan
             </span>
