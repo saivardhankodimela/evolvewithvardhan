@@ -50,12 +50,22 @@ def fetch_notion_updates(state: AgentState) -> AgentState:
         for row in results:
             props = row["properties"]
             try:
+                # Safe lookups for potentially empty Notion cells
+                category_obj = props.get("Category", {}) or {}
+                category_select = category_obj.get("select") or {}
+                
+                skill_obj = props.get("Skill", {}) or {}
+                skill_select = skill_obj.get("select") or {}
+                
+                date_obj = props.get("Date", {}) or {}
+                date_data = date_obj.get("date") or {}
+                
                 entry = {
                     "id": props.get("ID", {}).get("number", 0),
-                    "date": props.get("Date", {}).get("date", {}).get("start", ""),
+                    "date": date_data.get("start", ""),
                     "title": "".join([t["plain_text"] for t in props.get("Title", {}).get("title", [])]),
-                    "category": props.get("Category", {}).get("select", {}).get("name", "Learning"),
-                    "skill": props.get("Skill", {}).get("select", {}).get("name", "default"),
+                    "category": category_select.get("name", "Learning"),
+                    "skill": skill_select.get("name", "default"),
                     "description": "".join([t["plain_text"] for t in props.get("Description", {}).get("rich_text", [])])
                 }
                 parsed_entries.append(entry)
@@ -170,58 +180,25 @@ def parse_local_data(state: AgentState) -> AgentState:
 
 def merge_diff_safely(state: AgentState) -> AgentState:
     """
-    Merging Logic Core.
-     SECURITY POLICY (Accidental Deletion Defense):
-    We strictly iterate and map incoming Notion IDs. If a local ID is *missing* from Notion, 
-    we do ABSOLUTELY NOTHING. That log entry will survive permanently in Git. Notion is only allowed 
-    to append or overwrite, NEVER delete.
+    Merging Logic Core: Mirror Sync enabled.
+    Replaces local arrays with fetched Notion values to support Deletions.
     """
     logging.info("State Node: merge_diff_safely")
     if "error" in state: return state
     
     notion_entries = state.get("notion_entries", [])
-    local_data = state.get("local_data", {})
-    local_logs = local_data.get("logs", [])
-    
-    # 1. Map existing entries to defend them
-    existing_map = {log["id"]: log for log in local_logs if "id" in log}
-    
-    # 2. Safely superimpose the incoming Notion data array
-    added_count = 0
-    updated_count = 0
-    
-    for entry in notion_entries:
-        target_id = entry.get("id")
-        if not target_id: continue
-        
-        if target_id in existing_map:
-            updated_count += 1
-        else:
-            added_count += 1
-            
-        existing_map[target_id] = entry
-        
-    logging.info(f"Diff Analysis complete: {added_count} New additions, {updated_count} Overwrites.")
-        
-    # React expects logs sequentially
-    merged_logs = list(existing_map.values())
-    merged_logs.sort(key=lambda x: x["id"], reverse=True)
-    
-    local_data["logs"] = merged_logs
-    
-    # --- MERGE APPS SAFELY ---
     notion_apps = state.get("notion_apps", [])
-    if notion_apps:
-        # Avoid overriding Apps that are not in Notion
-        existing_apps = {app["id"]: app for app in local_data.get("apps", []) if "id" in app}
-        for n_app in notion_apps:
-            existing_apps[n_app["id"]] = n_app
-        
-        updated_apps = list(existing_apps.values())
-        updated_apps.sort(key=lambda x: x["id"], reverse=True)
-        local_data["apps"] = updated_apps
-        logging.info(f"Merged {len(notion_apps)} dynamic apps from Notion schema.")
-        
+    local_data = state.get("local_data", {})
+    
+    # Full Mirror Overwrite (allows deleting straight from Notion)
+    local_data["logs"] = notion_entries
+    local_data["apps"] = notion_apps
+    
+    # Sort backwards using ID to match Timeline visuals
+    local_data["logs"].sort(key=lambda x: x.get("id", 0), reverse=True)
+    local_data["apps"].sort(key=lambda x: x.get("id", 0), reverse=True)
+    
+    logging.info(f"Mirror Sync complete: {len(notion_entries)} Logs, {len(notion_apps)} Apps.")
     return {"merged_data": local_data}
 
 def write_secure_js(state: AgentState) -> AgentState:
