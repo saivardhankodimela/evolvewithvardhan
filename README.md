@@ -12,6 +12,14 @@ A cinematic, high-performance portfolio website driven by dynamic **Framer Motio
 
 ---
 
+## 📚 Documentation & Development History
+
+For a complete summary of the architecture and a visual walkthrough of the development cycle (including screenshot logs), explore the docs folder:
+
+*   **[Visual Worklog](./docs/VISUAL_WORKLOG.md)**: A chronological photo-album chronicling the iterative verify traces of fixes and setups.
+
+---
+
 ## 🛠️ Architecture Setup (Notion Sync Action)
 
 Every morning, a GitHub Action wakes up, calls Notion, reads updates, and injects them safely to disk files securely preserving standard local branches transparently.
