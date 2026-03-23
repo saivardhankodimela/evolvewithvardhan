@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Security Protections
+.env
+.env.*
+.env.local
+cron/.env
+*.pem
+secrets.json
