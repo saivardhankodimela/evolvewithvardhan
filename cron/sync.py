@@ -60,8 +60,8 @@ def fetch_notion_updates(state: AgentState) -> AgentState:
                 date_obj = props.get("Date", {}) or {}
                 date_data = date_obj.get("date") or {}
                 
-                status_obj = props.get("Status", {}) or {}
-                status_select = status_obj.get("status", {}).get("name", "Active") if "status" in status_obj else (status_obj.get("select") or {}).get("name", "Active")
+                visibility_obj = props.get("Visibility", {}) or {}
+                visibility_select = visibility_obj.get("select", {}).get("name", "Visible") if "select" in (visibility_obj or {}) else "Visible"
                 
                 # Custom Date Formatting (%d %B %Y) -> 24 March 2026
                 date_str = date_data.get("start", "")
@@ -81,7 +81,7 @@ def fetch_notion_updates(state: AgentState) -> AgentState:
                     "category": category_select.get("name", "Learning"),
                     "skill": skill_select.get("name", "default"),
                     "description": "".join([t["plain_text"] for t in props.get("Description", {}).get("rich_text", [])]),
-                    "status": status_select
+                    "visibility": visibility_select
                 }
                 parsed_entries.append(entry)
             except Exception as e:
@@ -95,13 +95,17 @@ def fetch_notion_updates(state: AgentState) -> AgentState:
             for row in app_results:
                 a_props = row["properties"]
                 try:
+                    v_obj = a_props.get("Visibility", {}) or {}
+                    visibility = v_obj.get("select", {}).get("name", "Visible") if "select" in v_obj else "Visible"
+                    
                     app_entry = {
                         "id": a_props.get("ID", {}).get("number", 0),
                         "name": "".join([t["plain_text"] for t in a_props.get("Name", {}).get("title", [])]),
                         "description": "".join([t["plain_text"] for t in a_props.get("Description", {}).get("rich_text", [])]),
                         "status": a_props.get("Status", {}).get("select", {}).get("name", "Stealth"),
                         "link": a_props.get("Link", {}).get("url", "#"),
-                        "themeColor": a_props.get("Theme", {}).get("select", {}).get("name", "from-emerald-500/20 to-teal-500/20")
+                        "themeColor": a_props.get("Theme", {}).get("select", {}).get("name", "from-emerald-500/20 to-teal-500/20"),
+                        "visibility": visibility
                     }
                     parsed_apps.append(app_entry)
                 except Exception as e:
@@ -178,7 +182,7 @@ def merge_diff_safely(state: AgentState) -> AgentState:
         if not target_id: continue
         
         # Soft-Delete Remote triggers
-        if entry.get("status") == "Deleted":
+        if entry.get("visibility") == "Deleted":
             if target_id in existing_map:
                 del existing_map[target_id]
                 logging.info(f"Deleted Log ID {target_id} from disk fallback.")
@@ -200,7 +204,7 @@ def merge_diff_safely(state: AgentState) -> AgentState:
     existing_apps = {app["id"]: app for app in local_apps if "id" in app}
     
     for n_app in notion_apps:
-        if n_app.get("status") == "Deleted":
+        if n_app.get("visibility") == "Deleted":
             if n_app["id"] in existing_apps:
                 del existing_apps[n_app["id"]]
                 logging.info(f"Deleted App ID {n_app['id']} from disk fallback.")
