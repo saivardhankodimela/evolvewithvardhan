@@ -4,15 +4,6 @@
 export const DATA = {
   "logs": [
     {
-      "id": 2,
-      "date": "24 March 2026",
-      "title": "Updated Readme and Visual Worklog",
-      "category": "Building",
-      "skill": "github",
-      "description": "added documents like readme and visual worklogs to have proof of work which I have gone through developing this app in antigravity ide.",
-      "visibility": "Visible"
-    },
-    {
       "id": 1,
       "date": "23 March 2026",
       "title": "Collaborated with Antigravity AI",
