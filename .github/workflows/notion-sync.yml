@@ -4,6 +4,7 @@ on:
   schedule:
     - cron: '0 5 * * *' # Executes daily at 5:00 AM UTC
   workflow_dispatch: # Allows manual trigger testing
+  # Forces a cache break on script paths to sync.py instead of notion_sync_engine.py
 
 jobs:
   sync-notion-data:
