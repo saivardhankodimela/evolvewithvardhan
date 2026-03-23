@@ -2,7 +2,7 @@ name: Agentic Notion Sync Engine
 
 on:
   schedule:
-    - cron: '0 5 * * *' # Executes daily at 5:00 AM UTC
+    - cron: '30 23 * * *' # Executes daily at 11:30 PM UTC (5:00 AM IST)
   push:
     branches: [ main ] # Triggers AUTOMATICALLY on every push
   workflow_dispatch: # Allows manual trigger testing

@@ -60,13 +60,28 @@ def fetch_notion_updates(state: AgentState) -> AgentState:
                 date_obj = props.get("Date", {}) or {}
                 date_data = date_obj.get("date") or {}
                 
+                status_obj = props.get("Status", {}) or {}
+                status_select = status_obj.get("status", {}).get("name", "Active") if "status" in status_obj else (status_obj.get("select") or {}).get("name", "Active")
+                
+                # Custom Date Formatting (%d %B %Y) -> 24 March 2026
+                date_str = date_data.get("start", "")
+                formatted_date = date_str
+                if date_str:
+                    try:
+                        from datetime import datetime
+                        parsed_date = datetime.strptime(date_str[:10], "%Y-%m-%d")
+                        formatted_date = parsed_date.strftime("%d %B %Y")
+                    except Exception:
+                        pass # Fallback to raw string if parsing fails
+                
                 entry = {
                     "id": props.get("ID", {}).get("number", 0),
-                    "date": date_data.get("start", ""),
+                    "date": formatted_date,
                     "title": "".join([t["plain_text"] for t in props.get("Title", {}).get("title", [])]),
                     "category": category_select.get("name", "Learning"),
                     "skill": skill_select.get("name", "default"),
-                    "description": "".join([t["plain_text"] for t in props.get("Description", {}).get("rich_text", [])])
+                    "description": "".join([t["plain_text"] for t in props.get("Description", {}).get("rich_text", [])]),
+                    "status": status_select
                 }
                 parsed_entries.append(entry)
             except Exception as e:
@@ -162,12 +177,18 @@ def merge_diff_safely(state: AgentState) -> AgentState:
         target_id = entry.get("id")
         if not target_id: continue
         
-        if target_id in existing_map:
-            updated_count += 1
+        # Soft-Delete Remote triggers
+        if entry.get("status") == "Deleted":
+            if target_id in existing_map:
+                del existing_map[target_id]
+                logging.info(f"Deleted Log ID {target_id} from disk fallback.")
         else:
-            added_count += 1
-        existing_map[target_id] = entry
-        
+            if target_id in existing_map:
+                updated_count += 1
+            else:
+                added_count += 1
+            existing_map[target_id] = entry
+            
     # React expects logs sequentially
     merged_logs = list(existing_map.values())
     merged_logs.sort(key=lambda x: x.get("id", 0), reverse=True)
@@ -179,8 +200,13 @@ def merge_diff_safely(state: AgentState) -> AgentState:
     existing_apps = {app["id"]: app for app in local_apps if "id" in app}
     
     for n_app in notion_apps:
-        existing_apps[n_app["id"]] = n_app
-        
+        if n_app.get("status") == "Deleted":
+            if n_app["id"] in existing_apps:
+                del existing_apps[n_app["id"]]
+                logging.info(f"Deleted App ID {n_app['id']} from disk fallback.")
+        else:
+            existing_apps[n_app["id"]] = n_app
+            
     merged_apps = list(existing_apps.values())
     merged_apps.sort(key=lambda x: x.get("id", 0), reverse=True)
     local_data["apps"] = merged_apps
