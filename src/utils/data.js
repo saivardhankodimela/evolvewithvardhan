@@ -2,50 +2,8 @@
 // SECURE JSON BOUNDARY ESTABLISHED: ALL INJECTIONS STERILIZED
 
 export const DATA = {
-  "logs": [
-    {
-      "id": 3,
-      "date": "Mar 18, 2026",
-      "title": "Testing Framer Motion Dynamics",
-      "category": "Experimenting",
-      "skill": "framer",
-      "description": "Built heavily animated scroll-linked UI elements referencing the \u201cTerminal Industries\u201d design aesthetics. Optimized DOM for 60fps renders."
-    },
-    {
-      "id": 2,
-      "date": "Mar 20, 2026",
-      "title": "Explored LangGraph Agent Orchestration",
-      "category": "Learning",
-      "skill": "python",
-      "description": "Tested multi-agent architectures using LangGraph strictly to orchestrate workflows involving document scraping and recursive summarization bots."
-    },
-    {
-      "id": 1,
-      "date": "2026-03-23",
-      "title": "Collaborated with Antigravity AI",
-      "category": "Building",
-      "skill": "googlegemini",
-      "description": "Worked with Google Deepmind\u2019s Antigravity agent ide to architect, secure, and deploy a seamless LangGraph GitOps sync pipeline for Evolve with Vardhan."
-    }
-  ],
-  "apps": [
-    {
-      "id": 2,
-      "name": "Glassmorphism UI Kit",
-      "description": "An open-source library of Tailwind CSS components utilizing L2 Frosted Pearl techniques.",
-      "status": "Building",
-      "link": "#",
-      "themeColor": "from-cobalt-500/20 to-blue-500/20"
-    },
-    {
-      "id": 1,
-      "name": "Evolve with Vardhan",
-      "description": "A cinematic, high-performance portfolio driven by dynamic Framer Motion and securely synced with Notion using LangGraph.",
-      "status": "Live",
-      "link": "https://evolvewithvardhan.vercel.app/",
-      "themeColor": "from-emerald-500/20 to-teal-500/20"
-    }
-  ],
+  "logs": [],
+  "apps": [],
   "social": {
     "linkedin": "https://linkedin.com/in/sai-vardhan-kodimela",
     "github": "https://github.com/saivardhankodimela",
