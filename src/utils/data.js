@@ -48,7 +48,7 @@ export const DATA = {
   ],
   "social": {
     "linkedin": "https://linkedin.com/in/sai-vardhan-kodimela",
-    "github": "https://github.com/saivardhan",
-    "email": "mailto:contact@saivardhan.com"
+    "github": "https://github.com/saivardhankodimela",
+    "email": "https://mail.google.com/mail/?view=cm&fs=1&to=saivardhankodimela@gmail.com"
   }
 };
