@@ -38,7 +38,7 @@ function App() {
               <li><a href="#home" className="hover:text-cobalt-500 dark:hover:text-cobalt-400 transition-colors">Home</a></li>
               <li><a href="#work" className="hover:text-cobalt-500 dark:hover:text-cobalt-400 transition-colors">Work</a></li>
               <li><a href="#growth-log" className="hover:text-cobalt-500 dark:hover:text-cobalt-400 transition-colors">Growth Log</a></li>
-              <li className="hidden sm:block"><a href="#home" className="hover:text-cobalt-500 dark:hover:text-cobalt-400 transition-colors">Connect</a></li>
+              <li className="hidden sm:block"><a href="#connect" className="hover:text-cobalt-500 dark:hover:text-cobalt-400 transition-colors">Connect</a></li>
             </ul>
           </div>
           <div className="pl-4 sm:pl-8 border-l border-slate-300/50 dark:border-white/10">

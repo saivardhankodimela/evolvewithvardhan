@@ -3,7 +3,7 @@ import { DATA } from '../utils/data';
 
 const Footer = () => {
   return (
-    <footer className="w-full mt-20 mb-8 px-6 max-w-5xl mx-auto">
+    <footer id="connect" className="w-full mt-20 mb-8 px-6 max-w-5xl mx-auto scroll-m-24">
       
       {/* Floating Glass Contact Plate */}
       <div className="glass-light dark:glass-dark rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 bg-gradient-to-br from-white/60 to-white/20 dark:from-zinc-800/60 dark:to-zinc-900/40 relative overflow-hidden">
