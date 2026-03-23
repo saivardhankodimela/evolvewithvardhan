@@ -3,6 +3,8 @@ name: Agentic Notion Sync Engine
 on:
   schedule:
     - cron: '0 5 * * *' # Executes daily at 5:00 AM UTC
+  push:
+    branches: [ main ] # Triggers AUTOMATICALLY on every push
   workflow_dispatch: # Allows manual trigger testing
   # Forces a cache break on script paths to sync.py instead of notion_sync_engine.py
 
