@@ -4,12 +4,21 @@
 export const DATA = {
   "logs": [
     {
+      "id": 4,
+      "date": "30 March 2026",
+      "title": "Learning AWS through Ansh Lamba",
+      "category": "Learning",
+      "skill": "cloudways",
+      "description": "learnt about Aws ecosystem for Data Engineer. I gone through services which are used in Data Engineer Ecosystem.",
+      "visibility": "Visible"
+    },
+    {
       "id": 3,
       "date": "25 March 2026",
       "title": "Explored Claude Code and OpenCode",
       "category": "Learning",
       "skill": "claude",
-      "description": "leaned about methods, how agents work, agents.md, skills.md files to utilize these terminals the best use",
+      "description": "learned about methods, how agents work, agents.md, skills.md files to utilize these terminals the best use",
       "visibility": "Visible"
     },
     {
