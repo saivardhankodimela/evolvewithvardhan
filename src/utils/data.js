@@ -4,6 +4,15 @@
 export const DATA = {
   "logs": [
     {
+      "id": 5,
+      "date": "06 April 2026",
+      "title": "SQL Joins (INNER vs LEFT)",
+      "category": "Learning",
+      "skill": "mysql",
+      "description": "Learned how to use INNER JOIN to filter records present in both tables, and LEFT JOIN to preserve all records from the left table even if no match exists in the right.",
+      "visibility": "Visible"
+    },
+    {
       "id": 4,
       "date": "30 March 2026",
       "title": "Learning AWS through Ansh Lamba",
