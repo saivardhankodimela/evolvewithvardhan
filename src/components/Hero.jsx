@@ -52,8 +52,7 @@ const Hero = ({ isDarkMode }) => {
           transition={{ duration: 0.5, delay: 0.3 }}
           className={`text-lg md:text-xl max-w-2xl leading-relaxed ${isDarkMode ? 'text-zinc-400' : 'text-zinc-600'}`}
         >
-          Specializing in AI automation, seamless web experiences, and scalable cloud architectures. 
-          I engineer digital solutions that blend striking aesthetics with peak performance.
+          Specializing in data engineering, cloud architectures, and scalable data solutions. I build reliable pipelines and intelligent systems that turn complex data into meaningful outcomes.
         </motion.p>
 
         {/* CTAs */}
